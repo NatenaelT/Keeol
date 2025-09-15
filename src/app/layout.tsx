@@ -4,6 +4,7 @@ import './globals.css'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { NotificationProvider } from '@/contexts/NotificationContext'
+import MobileNavigation from '@/components/layout/MobileNavigation'
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -43,6 +44,7 @@ export default function RootLayout({
         <AuthProvider>
           <NotificationProvider>
             {children}
+            <MobileNavigation />
             <Toaster 
               position="top-right"
               toastOptions={{

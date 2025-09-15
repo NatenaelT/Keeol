@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import jwt from 'jsonwebtoken'
 
 // Define route permissions for each role
 const routePermissions: Record<string, string[]> = {

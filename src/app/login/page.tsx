@@ -95,14 +95,30 @@ const LoginPage = () => {
     }
 
     setIsLoading(true)
-    const success = await sendOTP(phoneNumber)
-    
-    if (success) {
-      setStep('otp')
-      setCountdown(60)
-      toast.success('OTP sent to your phone!')
+
+    // Bypass OTP verification - directly login with phone number
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ phoneNumber }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        toast.success(`Welcome back, ${data.user.name}!`)
+        router.push('/')
+      } else {
+        toast.error(data.message || 'Login failed')
+      }
+    } catch (error) {
+      console.error('Login error:', error)
+      toast.error('Login failed. Please try again.')
     }
-    
+
     setIsLoading(false)
   }
 

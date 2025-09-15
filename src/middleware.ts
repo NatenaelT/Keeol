@@ -62,16 +62,19 @@ export function middleware(request: NextRequest) {
   
   // Get token from cookie or Authorization header
   const token = getTokenFromRequest(request)
-  
+
   if (!token) {
+    console.log(`No token found for ${pathname}, redirecting to login`)
     return redirectToLogin(request)
   }
+
+  console.log(`Found token for ${pathname}: ${token.substring(0, 20)}...`)
   
   try {
     // Decode our simplified token format: header.payload.signature
     const parts = token.split('.')
     if (parts.length !== 3) {
-      console.log('Invalid token format:', token.substring(0, 50) + '...')
+      console.log('Invalid token format for', pathname, ':', token.substring(0, 50) + '...')
       return redirectToLogin(request)
     }
 
@@ -79,26 +82,26 @@ export function middleware(request: NextRequest) {
     try {
       payload = JSON.parse(atob(parts[1]))
     } catch (e) {
-      console.log('Failed to parse token payload')
+      console.log('Failed to parse token payload for', pathname)
       return redirectToLogin(request)
     }
 
     const userRole = payload.role
     if (!userRole) {
-      console.log('Token missing role')
+      console.log('Token missing role for', pathname)
       return redirectToLogin(request)
     }
 
     // Basic token validation - check if it's not too old (24 hours)
     const tokenAge = Date.now() - (payload.iat || 0)
     if (tokenAge > 24 * 60 * 60 * 1000) {
-      console.log('Token expired')
+      console.log('Token expired for', pathname)
       return redirectToLogin(request)
     }
 
     // Check if user has required role
     if (!requiredRoles.includes(userRole)) {
-      console.log(`Access denied. User role: ${userRole}, Required: ${requiredRoles.join(', ')}`)
+      console.log(`Access denied for ${pathname}. User role: ${userRole}, Required: ${requiredRoles.join(', ')}`)
       return new NextResponse('Forbidden', { status: 403 })
     }
 
@@ -117,7 +120,7 @@ export function middleware(request: NextRequest) {
 
   } catch (error) {
     // Invalid token
-    console.log('Middleware error:', error)
+    console.log('Middleware error for', pathname, ':', error)
     return redirectToLogin(request)
   }
 }

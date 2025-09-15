@@ -26,9 +26,9 @@ const AuthPage = () => {
   useEffect(() => {
     if (isAuthenticated) {
       const redirectTo = searchParams.get('redirect') || '/profile'
-      router.push(redirectTo)
+      window.location.href = redirectTo
     }
-  }, [isAuthenticated, router, searchParams])
+  }, [isAuthenticated, searchParams])
 
   const handleModeChange = (newMode: 'signin' | 'signup') => {
     setMode(newMode)

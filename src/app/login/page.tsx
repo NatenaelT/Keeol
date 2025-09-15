@@ -321,12 +321,12 @@ const LoginPage = () => {
               <p className="text-sm text-gray-600 mb-4">Or continue with</p>
               
               <div className="flex justify-center">
-                <div 
+                <div
                   id="telegram-login-widget"
                   className="telegram-login-widget"
-                  data-telegram-login="your_bot_name"
+                  data-telegram-login="keeolburgerbot"
                   data-size="large"
-                  data-auth-url={`${window.location.origin}/api/auth/telegram`}
+                  data-auth-url={`${window.location.origin}/api/auth/telegram-login`}
                   data-request-access="write"
                 >
                   <button

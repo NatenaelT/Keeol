@@ -130,9 +130,9 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-8">
-            {navigation.map((item) => (
+            {navigation.slice(0, 6).map((item) => (
               <Link
-                key={item.name}
+                key={item.label}
                 href={item.href}
                 className={`text-sm font-medium transition-colors duration-200 ${
                   pathname === item.href
@@ -142,9 +142,22 @@ const Header = () => {
                       : 'text-white hover:text-brand-yellow'
                 }`}
               >
-                {item.name}
+                {item.label}
               </Link>
             ))}
+            {/* Dashboard/Admin Quick Access */}
+            {isAuthenticated && isStaff() && (
+              <Link
+                href={getDefaultDashboard()}
+                className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                  scrolled
+                    ? 'bg-brand-red text-white hover:bg-brand-red-dark'
+                    : 'bg-white/20 text-white hover:bg-white/30'
+                }`}
+              >
+                {isAdmin() ? 'Admin' : 'Dashboard'}
+              </Link>
+            )}
           </nav>
 
           {/* Right Side Actions */}

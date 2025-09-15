@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     // Set secure cookie
     const cookieStore = cookies()
     cookieStore.set('auth_token', token, {
-      httpOnly: true,
+      httpOnly: false, // Allow client-side access for auth state
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 7 * 24 * 60 * 60 // 7 days

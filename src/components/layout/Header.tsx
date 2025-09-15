@@ -28,6 +28,7 @@ const Header = () => {
   
   const { user, isAuthenticated, logout } = useAuth()
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications()
+  const { getNavigationItems, getDefaultDashboard, isAdmin, isStaff } = useRoleAccess()
   const router = useRouter()
   const pathname = usePathname()
 

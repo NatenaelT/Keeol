@@ -228,7 +228,7 @@ class AuthService {
   /**
    * Update user
    */
-  private async updateUser(userId: string, updates: any): Promise<void> {
+  async updateUser(userId: string, updates: any): Promise<void> {
     try {
       const { error } = await supabase
         .from('users')

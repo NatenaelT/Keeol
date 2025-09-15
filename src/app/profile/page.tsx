@@ -67,7 +67,7 @@ interface Reward {
 }
 
 const ProfilePage = () => {
-  const { user, isAuthenticated } = useAuth()
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth()
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loyaltyStats, setLoyaltyStats] = useState<LoyaltyStats>({
     totalEarned: 0,
@@ -323,16 +323,23 @@ const ProfilePage = () => {
     })
   }
 
-  if (!isAuthenticated) {
+  // Show loading while auth is initializing
+  if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Please sign in to view your profile</h2>
-          <div className="space-x-4">
-            <a href="/auth?mode=signin" className="btn-primary">Sign In</a>
-            <a href="/auth?mode=signup" className="btn-outline">Sign Up</a>
-          </div>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="loading-spinner w-8 h-8"></div>
+      </div>
+    )
+  }
+
+  // Redirect to auth if not authenticated (middleware should handle this, but as fallback)
+  if (!isAuthenticated) {
+    if (typeof window !== 'undefined') {
+      window.location.href = '/auth?mode=signin&redirect=/profile'
+    }
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="loading-spinner w-8 h-8"></div>
       </div>
     )
   }

@@ -9,6 +9,7 @@ const routePermissions: Record<string, string[]> = {
   '/menu': ['*'],
   '/login': ['*'],
   '/register': ['*'],
+  '/auth': ['*'],
   
   // Customer routes
   '/profile': ['customer', 'waiter', 'chef', 'delivery', 'operation_manager', 'admin', 'owner'],

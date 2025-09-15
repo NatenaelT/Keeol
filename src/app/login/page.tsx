@@ -111,7 +111,12 @@ const LoginPage = () => {
       if (response.ok && data.success) {
         toast.success(`Welcome back, ${data.user.name}!`)
         const redirectTo = searchParams.get('redirect') || '/profile'
-        router.push(redirectTo)
+
+        // Add a small delay to ensure cookie is set before navigation
+        setTimeout(() => {
+          // Use window.location for more reliable navigation after auth
+          window.location.href = redirectTo
+        }, 100)
       } else {
         toast.error(data.message || 'Login failed')
       }
@@ -142,7 +147,12 @@ const LoginPage = () => {
       if (response.ok && data.success) {
         toast.success(`Welcome, ${data.user.name}!`)
         const redirectTo = searchParams.get('redirect') || '/profile'
-        router.push(redirectTo)
+
+        // Add a small delay to ensure cookie is set before navigation
+        setTimeout(() => {
+          // Use window.location for more reliable navigation after auth
+          window.location.href = redirectTo
+        }, 100)
       } else {
         toast.error(data.message || 'Telegram login failed')
       }

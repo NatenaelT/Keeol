@@ -316,7 +316,9 @@ const LoginPage = () => {
                   <button
                     onClick={() => {
                       // Fallback Telegram login button
-                      toast.info('Telegram login will be available once the bot is configured')
+                      toast('Telegram login will be available once the bot is configured', {
+                        icon: 'ℹ️',
+                      })
                     }}
                     className="flex items-center justify-center space-x-2 w-full py-3 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200"
                   >

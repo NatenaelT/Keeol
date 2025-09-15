@@ -51,18 +51,52 @@ const Header = () => {
     return () => document.removeEventListener('click', handleClickOutside)
   }, [])
 
-  const navigation = [
-    { name: 'Home', href: '/' },
-    { name: 'Menu', href: '/menu' },
-    { name: 'About', href: '/about' },
-    { name: 'Contact', href: '/contact' },
+  // Get role-based navigation
+  const navigation = isAuthenticated ? getNavigationItems() : [
+    { label: 'Home', href: '/' },
+    { label: 'Menu', href: '/menu' },
+    { label: 'About', href: '/about' },
+    { label: 'Contact', href: '/contact' },
   ]
 
-  const userNavigation = [
-    { name: 'Profile', href: '/profile', icon: User },
-    { name: 'Orders', href: '/orders', icon: ShoppingCart },
-    { name: 'Settings', href: '/settings', icon: Settings },
-  ]
+  // Role-based user menu
+  const getUserNavigation = () => {
+    const baseItems = [
+      { name: 'Profile', href: '/profile', icon: User },
+    ]
+
+    if (user?.role === 'customer') {
+      return [
+        ...baseItems,
+        { name: 'My Orders', href: '/orders', icon: ShoppingCart },
+        { name: 'Track Order', href: '/track', icon: ShoppingCart },
+        { name: 'Loyalty Points', href: '/loyalty', icon: Settings },
+        { name: 'Settings', href: '/settings', icon: Settings },
+      ]
+    }
+
+    if (isStaff()) {
+      const staffItems = [
+        ...baseItems,
+        { name: 'Dashboard', href: getDefaultDashboard(), icon: ShoppingCart },
+      ]
+
+      if (isAdmin()) {
+        staffItems.push(
+          { name: 'Admin Panel', href: '/admin', icon: Settings },
+          { name: 'User Analytics', href: '/admin/analytics', icon: ShoppingCart },
+          { name: 'CRM', href: '/dashboard/crm', icon: User }
+        )
+      }
+
+      staffItems.push({ name: 'Settings', href: '/settings', icon: Settings })
+      return staffItems
+    }
+
+    return baseItems
+  }
+
+  const userNavigation = getUserNavigation()
 
   const handleLogout = () => {
     logout()

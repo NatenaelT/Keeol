@@ -77,6 +77,17 @@ interface AuthProviderProps {
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [state, dispatch] = useReducer(authReducer, initialState)
 
+  // Role-based permissions mapping
+  const rolePermissions: Record<UserRole, string[]> = {
+    customer: ['order.create', 'order.view', 'order.track', 'profile.edit'],
+    waiter: ['order.create', 'order.view', 'order.update', 'table.manage', 'customer.assist'],
+    chef: ['order.view', 'order.prepare', 'kitchen.manage', 'inventory.view'],
+    delivery: ['order.view', 'delivery.manage', 'location.track'],
+    operation_manager: ['order.manage', 'staff.view', 'reports.view', 'inventory.manage'],
+    admin: ['*'], // All permissions
+    owner: ['*'], // All permissions
+  }
+
   // Initialize auth state on app load
   useEffect(() => {
     initializeAuth()

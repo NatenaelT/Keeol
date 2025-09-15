@@ -27,6 +27,7 @@ const routePermissions: Record<string, string[]> = {
   
   // Management routes
   '/dashboard': ['operation_manager', 'admin', 'owner'],
+  '/dashboard/crm': ['operation_manager', 'admin', 'owner'],
   '/dashboard/analytics': ['operation_manager', 'admin', 'owner'],
   '/dashboard/inventory': ['operation_manager', 'admin', 'owner'],
   '/dashboard/staff': ['admin', 'owner'],

@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useNotifications } from '@/contexts/NotificationContext'
+import { useRoleAccess } from '@/hooks/useRoleAccess'
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false)

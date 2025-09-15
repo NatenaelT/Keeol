@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.57.4",
     "@types/jsonwebtoken": "^9.0.10",
     "axios": "^1.6.0",
     "clsx": "^2.0.0",

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { authService } from '@/services/authService'
-import bcrypt from 'bcryptjs'
 
 export async function POST(request: NextRequest) {
   try {

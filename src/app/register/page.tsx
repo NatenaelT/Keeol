@@ -109,7 +109,12 @@ const RegisterPage = () => {
     if (success) {
       toast.success('Account created successfully!')
       const redirectTo = searchParams.get('redirect') || '/profile'
-      router.push(redirectTo)
+
+      // Add a small delay to ensure cookie is set before navigation
+      setTimeout(() => {
+        // Use window.location for more reliable navigation after auth
+        window.location.href = redirectTo
+      }, 100)
     }
     
     setIsLoading(false)

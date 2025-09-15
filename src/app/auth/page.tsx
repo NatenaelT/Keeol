@@ -25,9 +25,10 @@ const AuthPage = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/')
+      const redirectTo = searchParams.get('redirect') || '/profile'
+      router.push(redirectTo)
     }
-  }, [isAuthenticated, router])
+  }, [isAuthenticated, router, searchParams])
 
   const handleModeChange = (newMode: 'signin' | 'signup') => {
     setMode(newMode)
@@ -58,11 +59,12 @@ const AuthPage = () => {
 
       if (response.ok && result.success) {
         toast.success(
-          data.mode === 'signin' 
+          data.mode === 'signin'
             ? `Welcome back, ${result.user.name}!`
             : `Account created successfully! Welcome, ${result.user.name}!`
         )
-        router.push('/')
+        const redirectTo = searchParams.get('redirect') || '/profile'
+        router.push(redirectTo)
         return true
       } else {
         toast.error(result.message || `${data.mode === 'signin' ? 'Sign in' : 'Sign up'} failed`)

@@ -374,14 +374,23 @@ const Header = () => {
               <div className="py-4 space-y-2">
                 {navigation.map((item) => (
                   <Link
-                    key={item.name}
+                    key={item.label}
                     href={item.href}
                     className="block px-4 py-2 text-gray-900 hover:bg-gray-100 rounded-lg mx-2"
                     onClick={() => setIsOpen(false)}
                   >
-                    {item.name}
+                    {item.label}
                   </Link>
                 ))}
+                {isAuthenticated && isStaff() && (
+                  <Link
+                    href={getDefaultDashboard()}
+                    className="block btn-primary mx-2 mt-2 text-center"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {isAdmin() ? 'Admin Panel' : 'Dashboard'}
+                  </Link>
+                )}
                 {!isAuthenticated && (
                   <>
                     <Link

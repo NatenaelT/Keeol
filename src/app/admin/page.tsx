@@ -2,451 +2,434 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { 
-  Users, 
-  UtensilsCrossed, 
-  BarChart3, 
-  Settings,
-  CreditCard,
-  MessageCircle,
-  TrendingUp,
-  TrendingDown,
-  ArrowRight,
-  Plus,
-  Edit,
-  Trash2,
-  Eye,
-  DollarSign,
+import {
+  Users,
   ShoppingBag,
-  UserCheck,
-  AlertTriangle,
-  CheckCircle,
-  Clock
+  TrendingUp,
+  DollarSign,
+  UserPlus,
+  Activity,
+  Award,
+  Clock,
+  MapPin,
+  Phone,
+  Mail,
+  Star,
+  Calendar,
+  BarChart3,
+  PieChart,
+  Target
 } from 'lucide-react'
-import Link from 'next/link'
-import Header from '@/components/layout/Header'
-import MobileNavigation from '@/components/layout/MobileNavigation'
 import RoleGuard from '@/components/auth/RoleGuard'
+import { useAuth } from '@/contexts/AuthContext'
 
-interface DashboardStats {
+interface UserStats {
   totalUsers: number
+  newUsersToday: number
   activeUsers: number
-  totalOrders: number
-  totalRevenue: number
-  avgOrderValue: number
-  pendingOrders: number
-  completedOrders: number
-  totalMenuItems: number
-  revenueGrowth: number
-  orderGrowth: number
-  userGrowth: number
+  loyaltyTiers: {
+    bronze: number
+    silver: number
+    gold: number
+    platinum: number
+  }
 }
 
-interface QuickStats {
-  label: string
-  value: string | number
-  change: number
-  icon: any
-  color: string
+interface OrderStats {
+  totalOrders: number
+  todayOrders: number
+  totalRevenue: number
+  todayRevenue: number
+  averageOrderValue: number
+}
+
+interface RecentUser {
+  id: string
+  name: string
+  email?: string
+  phone_number: string
+  role: string
+  loyalty_tier: string
+  loyalty_points: number
+  created_at: string
+  last_login?: string
+  total_orders?: number
+  total_spent?: number
 }
 
 const AdminDashboard = () => {
-  const [stats, setStats] = useState<DashboardStats | null>(null)
-  const [recentOrders, setRecentOrders] = useState<any[]>([])
-  const [recentUsers, setRecentUsers] = useState<any[]>([])
+  const { user } = useAuth()
+  const [userStats, setUserStats] = useState<UserStats>({
+    totalUsers: 0,
+    newUsersToday: 0,
+    activeUsers: 0,
+    loyaltyTiers: { bronze: 0, silver: 0, gold: 0, platinum: 0 }
+  })
+  const [orderStats, setOrderStats] = useState<OrderStats>({
+    totalOrders: 0,
+    todayOrders: 0,
+    totalRevenue: 0,
+    todayRevenue: 0,
+    averageOrderValue: 0
+  })
+  const [recentUsers, setRecentUsers] = useState<RecentUser[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
-  // Mock data
   useEffect(() => {
-    const mockStats: DashboardStats = {
-      totalUsers: 1248,
-      activeUsers: 892,
-      totalOrders: 3567,
-      totalRevenue: 458920,
-      avgOrderValue: 287,
-      pendingOrders: 23,
-      completedOrders: 89,
-      totalMenuItems: 47,
-      revenueGrowth: 12.5,
-      orderGrowth: 8.3,
-      userGrowth: 15.2
-    }
-
-    const mockRecentOrders = [
-      {
-        id: 'KBP-001',
-        customer: 'John Doe',
-        total: 450,
-        status: 'delivered',
-        time: '10 min ago'
-      },
-      {
-        id: 'KBP-002', 
-        customer: 'Jane Smith',
-        total: 320,
-        status: 'preparing',
-        time: '15 min ago'
-      },
-      {
-        id: 'KBP-003',
-        customer: 'Mike Johnson', 
-        total: 680,
-        status: 'confirmed',
-        time: '22 min ago'
-      }
-    ]
-
-    const mockRecentUsers = [
-      {
-        id: '1',
-        name: 'Alice Wilson',
-        role: 'customer',
-        joined: '2 hours ago',
-        status: 'active'
-      },
-      {
-        id: '2', 
-        name: 'Bob Chen',
-        role: 'customer',
-        joined: '4 hours ago',
-        status: 'active'
-      },
-      {
-        id: '3',
-        name: 'Carol Davis',
-        role: 'waiter',
-        joined: '1 day ago',
-        status: 'active'
-      }
-    ]
-
-    setTimeout(() => {
-      setStats(mockStats)
-      setRecentOrders(mockRecentOrders)
-      setRecentUsers(mockRecentUsers)
-      setIsLoading(false)
-    }, 1000)
+    fetchAnalytics()
   }, [])
 
-  const quickStats: QuickStats[] = [
-    {
-      label: 'Total Revenue',
-      value: stats ? `${stats.totalRevenue.toLocaleString()} ETB` : '0',
-      change: stats?.revenueGrowth || 0,
-      icon: DollarSign,
-      color: 'green'
-    },
-    {
-      label: 'Total Orders',
-      value: stats?.totalOrders || 0,
-      change: stats?.orderGrowth || 0,
-      icon: ShoppingBag,
-      color: 'blue'
-    },
-    {
-      label: 'Active Users',
-      value: stats?.activeUsers || 0,
-      change: stats?.userGrowth || 0,
-      icon: UserCheck,
-      color: 'purple'
-    },
-    {
-      label: 'Avg Order Value',
-      value: stats ? `${stats.avgOrderValue} ETB` : '0',
-      change: 5.2,
-      icon: TrendingUp,
-      color: 'orange'
-    }
-  ]
+  const fetchAnalytics = async () => {
+    try {
+      const [usersResponse, ordersResponse, recentResponse] = await Promise.all([
+        fetch('/api/admin/analytics/users'),
+        fetch('/api/admin/analytics/orders'),
+        fetch('/api/admin/analytics/recent-users')
+      ])
 
-  const quickActions = [
-    {
-      title: 'Menu Management',
-      description: 'Add, edit, or remove menu items',
-      href: '/admin/menu',
-      icon: UtensilsCrossed,
-      color: 'bg-red-500'
-    },
-    {
-      title: 'User Management',
-      description: 'Manage user accounts and roles',
-      href: '/admin/users',
-      icon: Users,
-      color: 'bg-blue-500'
-    },
-    {
-      title: 'Analytics & Reports',
-      description: 'View detailed analytics and reports',
-      href: '/admin/analytics',
-      icon: BarChart3,
-      color: 'bg-green-500'
-    },
-    {
-      title: 'Payment Management',
-      description: 'View transactions and payment settings',
-      href: '/admin/payments',
-      icon: CreditCard,
-      color: 'bg-purple-500'
-    },
-    {
-      title: 'CRM & Support',
-      description: 'Manage customer support and CRM',
-      href: '/dashboard/crm',
-      icon: MessageCircle,
-      color: 'bg-orange-500'
-    },
-    {
-      title: 'System Settings',
-      description: 'Configure app settings and preferences',
-      href: '/admin/settings',
-      icon: Settings,
-      color: 'bg-gray-500'
-    }
-  ]
+      if (usersResponse.ok) {
+        const usersData = await usersResponse.json()
+        setUserStats(usersData)
+      }
 
-  const orderStatusConfig = {
-    pending: { color: 'text-yellow-600', bg: 'bg-yellow-100', icon: Clock },
-    confirmed: { color: 'text-blue-600', bg: 'bg-blue-100', icon: CheckCircle },
-    preparing: { color: 'text-orange-600', bg: 'bg-orange-100', icon: AlertTriangle },
-    delivered: { color: 'text-green-600', bg: 'bg-green-100', icon: CheckCircle }
+      if (ordersResponse.ok) {
+        const ordersData = await ordersResponse.json()
+        setOrderStats(ordersData)
+      }
+
+      if (recentResponse.ok) {
+        const recentData = await recentResponse.json()
+        setRecentUsers(recentData.users || [])
+      }
+    } catch (error) {
+      console.error('Failed to fetch analytics:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const StatCard = ({ title, value, change, icon: Icon, color }: any) => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+    >
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-gray-600">{title}</p>
+          <p className="text-3xl font-bold text-gray-900 mt-2">{value}</p>
+          {change && (
+            <p className={`text-sm mt-1 ${change > 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {change > 0 ? '+' : ''}{change}% from yesterday
+            </p>
+          )}
+        </div>
+        <div className={`p-3 rounded-full ${color}`}>
+          <Icon className="w-6 h-6 text-white" />
+        </div>
+      </div>
+    </motion.div>
+  )
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-ET', {
+      style: 'currency',
+      currency: 'ETB',
+      minimumFractionDigits: 0
+    }).format(amount)
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  }
+
+  const getTierColor = (tier: string) => {
+    switch (tier.toLowerCase()) {
+      case 'platinum': return 'bg-purple-100 text-purple-800'
+      case 'gold': return 'bg-yellow-100 text-yellow-800'
+      case 'silver': return 'bg-gray-100 text-gray-800'
+      default: return 'bg-orange-100 text-orange-800'
+    }
+  }
+
+  const getRoleColor = (role: string) => {
+    switch (role) {
+      case 'admin': return 'bg-red-100 text-red-800'
+      case 'owner': return 'bg-purple-100 text-purple-800'
+      case 'operation_manager': return 'bg-blue-100 text-blue-800'
+      case 'staff': return 'bg-green-100 text-green-800'
+      default: return 'bg-gray-100 text-gray-800'
+    }
   }
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <div className="pt-20 pb-20 lg:pb-8">
-          <div className="container-responsive py-8">
-            <div className="animate-pulse space-y-8">
-              <div className="h-8 bg-gray-300 rounded w-1/3"></div>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                {[...Array(4)].map((_, i) => (
-                  <div key={i} className="h-24 bg-gray-300 rounded"></div>
-                ))}
-              </div>
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2 h-64 bg-gray-300 rounded"></div>
-                <div className="h-64 bg-gray-300 rounded"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <MobileNavigation />
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="loading-spinner"></div>
       </div>
     )
   }
 
   return (
     <RoleGuard allowedRoles={['admin', 'owner']}>
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        
-        <div className="pt-20 pb-20 lg:pb-8">
-          <div className="container-responsive py-8">
-            {/* Header */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-8"
-            >
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
-              <p className="text-gray-600">Welcome back! Here's what's happening at Keeol Burger.</p>
-            </motion.div>
+      <div className="min-h-screen bg-gray-50 pt-20">
+        <div className="container-responsive py-8">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+            <p className="text-gray-600 mt-2">
+              Welcome back, {user?.name}. Here's what's happening at Keeol Burger today.
+            </p>
+          </div>
 
-            {/* Quick Stats */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
-            >
-              {quickStats.map((stat, index) => (
-                <div key={index} className="card">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600">{stat.label}</p>
-                      <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                    </div>
-                    <div className={`w-12 h-12 bg-${stat.color}-500 rounded-lg flex items-center justify-center`}>
-                      <stat.icon className="w-6 h-6 text-white" />
-                    </div>
-                  </div>
-                  <div className="mt-4 flex items-center">
-                    {stat.change > 0 ? (
-                      <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
-                    ) : (
-                      <TrendingDown className="w-4 h-4 text-red-500 mr-1" />
-                    )}
-                    <span className={`text-sm font-medium ${
-                      stat.change > 0 ? 'text-green-500' : 'text-red-500'
-                    }`}>
-                      {stat.change > 0 ? '+' : ''}{stat.change}%
-                    </span>
-                    <span className="text-sm text-gray-600 ml-1">from last month</span>
-                  </div>
-                </div>
-              ))}
-            </motion.div>
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <StatCard
+              title="Total Users"
+              value={userStats.totalUsers.toLocaleString()}
+              change={userStats.newUsersToday}
+              icon={Users}
+              color="bg-blue-500"
+            />
+            <StatCard
+              title="Today's Orders"
+              value={orderStats.todayOrders.toLocaleString()}
+              icon={ShoppingBag}
+              color="bg-green-500"
+            />
+            <StatCard
+              title="Today's Revenue"
+              value={formatCurrency(orderStats.todayRevenue)}
+              icon={DollarSign}
+              color="bg-purple-500"
+            />
+            <StatCard
+              title="Active Users"
+              value={userStats.activeUsers.toLocaleString()}
+              icon={Activity}
+              color="bg-orange-500"
+            />
+          </div>
 
-            {/* Quick Actions */}
+          {/* Charts Row */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            {/* Loyalty Tiers */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="mb-8"
+              className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
             >
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">Quick Actions</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {quickActions.map((action, index) => (
-                  <Link
-                    key={index}
-                    href={action.href}
-                    className="card hover:shadow-xl transition-all duration-300 group"
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className={`w-12 h-12 ${action.color} rounded-lg flex items-center justify-center`}>
-                        <action.icon className="w-6 h-6 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-brand-red transition-colors">
-                          {action.title}
-                        </h3>
-                        <p className="text-gray-600 text-sm">{action.description}</p>
-                      </div>
-                      <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-brand-red transition-colors" />
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-gray-900">Loyalty Tiers</h3>
+                <Award className="w-5 h-5 text-gray-500" />
+              </div>
+              <div className="space-y-4">
+                {Object.entries(userStats.loyaltyTiers).map(([tier, count]) => (
+                  <div key={tier} className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <span className={`px-2 py-1 rounded-lg text-sm font-medium ${getTierColor(tier)}`}>
+                        {tier.charAt(0).toUpperCase() + tier.slice(1)}
+                      </span>
                     </div>
-                  </Link>
+                    <span className="text-gray-900 font-medium">{count}</span>
+                  </div>
                 ))}
               </div>
             </motion.div>
 
-            {/* Recent Activity */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Recent Orders */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="card"
-              >
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900">Recent Orders</h3>
-                  <Link 
-                    href="/admin/orders" 
-                    className="text-brand-red hover:text-brand-red-dark text-sm font-medium"
-                  >
-                    View All
-                  </Link>
-                </div>
-                
-                <div className="space-y-4">
-                  {recentOrders.map((order) => {
-                    const statusInfo = orderStatusConfig[order.status as keyof typeof orderStatusConfig]
-                    const StatusIcon = statusInfo.icon
-                    
-                    return (
-                      <div key={order.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-8 h-8 ${statusInfo.bg} rounded-full flex items-center justify-center`}>
-                            <StatusIcon className={`w-4 h-4 ${statusInfo.color}`} />
-                          </div>
-                          <div>
-                            <p className="font-medium text-gray-900">#{order.id}</p>
-                            <p className="text-sm text-gray-600">{order.customer}</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-semibold text-gray-900">{order.total} ETB</p>
-                          <p className="text-xs text-gray-500">{order.time}</p>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </motion.div>
-
-              {/* Recent Users */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="card"
-              >
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900">New Users</h3>
-                  <Link 
-                    href="/admin/users" 
-                    className="text-brand-red hover:text-brand-red-dark text-sm font-medium"
-                  >
-                    View All
-                  </Link>
-                </div>
-                
-                <div className="space-y-4">
-                  {recentUsers.map((user) => (
-                    <div key={user.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-brand-red rounded-full flex items-center justify-center text-white font-semibold">
-                          {user.name.charAt(0)}
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-900">{user.name}</p>
-                          <p className="text-sm text-gray-600 capitalize">{user.role}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className={`w-2 h-2 rounded-full ${
-                          user.status === 'active' ? 'bg-green-400' : 'bg-gray-400'
-                        } mb-1`}></div>
-                        <p className="text-xs text-gray-500">{user.joined}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-            </div>
-
-            {/* System Health */}
+            {/* Key Metrics */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="mt-8"
+              className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
             >
-              <div className="card">
-                <h3 className="text-lg font-semibold text-gray-900 mb-6">System Overview</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="text-center">
-                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <CheckCircle className="w-8 h-8 text-green-600" />
-                    </div>
-                    <h4 className="font-semibold text-gray-900 mb-1">All Systems Operational</h4>
-                    <p className="text-sm text-gray-600">Website, payments, and notifications working normally</p>
-                  </div>
-                  
-                  <div className="text-center">
-                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <Clock className="w-8 h-8 text-blue-600" />
-                    </div>
-                    <h4 className="font-semibold text-gray-900 mb-1">Average Response Time</h4>
-                    <p className="text-sm text-gray-600">2.3 seconds across all endpoints</p>
-                  </div>
-                  
-                  <div className="text-center">
-                    <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <TrendingUp className="w-8 h-8 text-purple-600" />
-                    </div>
-                    <h4 className="font-semibold text-gray-900 mb-1">Uptime</h4>
-                    <p className="text-sm text-gray-600">99.9% uptime this month</p>
-                  </div>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-gray-900">Key Metrics</h3>
+                <BarChart3 className="w-5 h-5 text-gray-500" />
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">Total Orders</span>
+                  <span className="text-gray-900 font-medium">{orderStats.totalOrders.toLocaleString()}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">Total Revenue</span>
+                  <span className="text-gray-900 font-medium">{formatCurrency(orderStats.totalRevenue)}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">Average Order Value</span>
+                  <span className="text-gray-900 font-medium">{formatCurrency(orderStats.averageOrderValue)}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">New Users Today</span>
+                  <span className="text-gray-900 font-medium">{userStats.newUsersToday}</span>
                 </div>
               </div>
             </motion.div>
           </div>
-        </div>
 
-        <MobileNavigation />
+          {/* Recent Users */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white rounded-xl shadow-lg border border-gray-100"
+          >
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900">Recent Users</h3>
+                <UserPlus className="w-5 h-5 text-gray-500" />
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      User
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Contact
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Role & Tier
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Activity
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Points
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {recentUsers.map((user) => (
+                    <tr key={user.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="w-10 h-10 bg-brand-red rounded-full flex items-center justify-center">
+                            <span className="text-white text-sm font-medium">
+                              {user.name.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                            <div className="text-sm text-gray-500">
+                              Joined {formatDate(user.created_at)}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="space-y-1">
+                          <div className="flex items-center text-sm text-gray-900">
+                            <Phone className="w-4 h-4 mr-2 text-gray-400" />
+                            {user.phone_number}
+                          </div>
+                          {user.email && (
+                            <div className="flex items-center text-sm text-gray-500">
+                              <Mail className="w-4 h-4 mr-2 text-gray-400" />
+                              {user.email}
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="space-y-2">
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleColor(user.role)}`}>
+                            {user.role}
+                          </span>
+                          <br />
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getTierColor(user.loyalty_tier)}`}>
+                            {user.loyalty_tier}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <div className="space-y-1">
+                          <div>Orders: {user.total_orders || 0}</div>
+                          <div>Spent: {formatCurrency(user.total_spent || 0)}</div>
+                          {user.last_login && (
+                            <div className="text-xs text-gray-500">
+                              Last: {formatDate(user.last_login)}
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <Star className="w-4 h-4 text-yellow-400 mr-1" />
+                          <span className="text-sm font-medium text-gray-900">
+                            {user.loyalty_points || 0}
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </motion.div>
+
+          {/* Quick Actions */}
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <motion.a
+              href="/admin/users"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="block bg-white rounded-xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300"
+            >
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-blue-500 rounded-full">
+                  <Users className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Manage Users</h3>
+                  <p className="text-gray-600">View and manage user accounts</p>
+                </div>
+              </div>
+            </motion.a>
+
+            <motion.a
+              href="/dashboard/crm"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="block bg-white rounded-xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300"
+            >
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-green-500 rounded-full">
+                  <Target className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">CRM Dashboard</h3>
+                  <p className="text-gray-600">Customer relationship management</p>
+                </div>
+              </div>
+            </motion.a>
+
+            <motion.a
+              href="/admin/cms"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="block bg-white rounded-xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300"
+            >
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-purple-500 rounded-full">
+                  <PieChart className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Content Management</h3>
+                  <p className="text-gray-600">Manage menus and content</p>
+                </div>
+              </div>
+            </motion.a>
+          </div>
+        </div>
       </div>
     </RoleGuard>
   )

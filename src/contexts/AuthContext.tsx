@@ -3,20 +3,9 @@
 import { createContext, useContext, useReducer, useEffect, ReactNode } from 'react'
 import { toast } from 'react-hot-toast'
 import Cookies from 'js-cookie'
+import { authService, User } from '@/services/authService'
 
 export type UserRole = 'customer' | 'waiter' | 'chef' | 'delivery' | 'operation_manager' | 'admin' | 'owner'
-
-export interface User {
-  id: string
-  phoneNumber: string
-  telegramId?: string
-  name: string
-  role: UserRole
-  avatar?: string
-  isActive: boolean
-  createdAt: string
-  permissions: string[]
-}
 
 export interface AuthState {
   user: User | null
@@ -110,7 +99,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       if (token) {
         dispatch({ type: 'SET_TOKEN', payload: token })
         // Verify token and get user data
-        const userData = await verifyToken(token)
+        const userData = await authService.verifyToken(token)
         if (userData) {
           dispatch({ type: 'SET_USER', payload: userData })
         } else {
@@ -125,49 +114,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }
 
-  const verifyToken = async (token: string): Promise<User | null> => {
-    try {
-      // Simulate API call to verify token
-      // Replace with actual API endpoint
-      const response = await fetch('/api/auth/verify', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      
-      if (response.ok) {
-        return await response.json()
-      }
-      return null
-    } catch (error) {
-      console.error('Token verification failed:', error)
-      return null
-    }
-  }
-
   const sendOTP = async (phoneNumber: string): Promise<boolean> => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true })
       
-      const response = await fetch('/api/auth/send-otp', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ phoneNumber }),
-      })
-
-      if (response.ok) {
+      const success = await authService.sendOTP(phoneNumber)
+      
+      if (success) {
         toast.success('OTP sent successfully!')
         return true
       } else {
-        const error = await response.json()
-        toast.error(error.message || 'Failed to send OTP')
+        toast.error('Failed to send OTP. Please try again.')
         return false
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Send OTP failed:', error)
-      toast.error('Network error. Please try again.')
+      toast.error(error.message || 'Failed to send OTP. Please try again.')
       return false
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false })
@@ -178,16 +140,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true })
       
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ phoneNumber, otp }),
-      })
-
-      if (response.ok) {
-        const { user, token } = await response.json()
+      const result = await authService.verifyOTP(phoneNumber, otp)
+      
+      if (result) {
+        const { user, token } = result
         
         // Store token in secure cookie
         Cookies.set('auth_token', token, { 
@@ -202,13 +158,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         toast.success(`Welcome back, ${user.name}!`)
         return true
       } else {
-        const error = await response.json()
-        toast.error(error.message || 'Login failed')
+        toast.error('Login failed. Please check your OTP.')
         return false
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login failed:', error)
-      toast.error('Network error. Please try again.')
+      toast.error(error.message || 'Login failed. Please try again.')
       return false
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false })
@@ -219,16 +174,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true })
       
-      const response = await fetch('/api/auth/telegram-login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ telegramData }),
-      })
-
-      if (response.ok) {
-        const { user, token } = await response.json()
+      const result = await authService.loginWithTelegram(telegramData)
+      
+      if (result) {
+        const { user, token } = result
         
         Cookies.set('auth_token', token, { 
           expires: 7,
@@ -242,13 +191,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         toast.success(`Welcome, ${user.name}!`)
         return true
       } else {
-        const error = await response.json()
-        toast.error(error.message || 'Telegram login failed')
+        toast.error('Telegram login failed. Please try again.')
         return false
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Telegram login failed:', error)
-      toast.error('Network error. Please try again.')
+      toast.error(error.message || 'Telegram login failed. Please try again.')
       return false
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false })
@@ -263,21 +211,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const refreshToken = async (): Promise<boolean> => {
     try {
-      const response = await fetch('/api/auth/refresh', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${state.token}`,
-        },
-      })
+      if (!state.token) return false
 
-      if (response.ok) {
-        const { token } = await response.json()
-        Cookies.set('auth_token', token, { 
-          expires: 7,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'strict'
-        })
-        dispatch({ type: 'SET_TOKEN', payload: token })
+      const userData = await authService.verifyToken(state.token)
+      if (userData) {
+        dispatch({ type: 'SET_USER', payload: userData })
         return true
       }
       return false
@@ -290,8 +228,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const hasPermission = (permission: string): boolean => {
     if (!state.user) return false
     
-    const userPermissions = rolePermissions[state.user.role] || []
-    return userPermissions.includes('*') || userPermissions.includes(permission)
+    // Check if user has explicit permission or wildcard
+    return state.user.permissions.includes('*') || state.user.permissions.includes(permission)
   }
 
   const hasRole = (roles: UserRole | UserRole[]): boolean => {
@@ -314,3 +252,5 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
+
+export { User }

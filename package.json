@@ -1,0 +1,40 @@
+{
+  "name": "keeol-burger-system",
+  "version": "1.0.0",
+  "description": "Complete restaurant management system for Keeol Burger and Pizza House",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "^14.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "axios": "^1.6.0",
+    "socket.io-client": "^4.7.0",
+    "react-hook-form": "^7.48.0",
+    "framer-motion": "^10.16.0",
+    "lucide-react": "^0.294.0",
+    "js-cookie": "^3.0.5",
+    "react-hot-toast": "^2.4.1",
+    "date-fns": "^2.30.0",
+    "clsx": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.9.0",
+    "@types/react": "^18.2.37",
+    "@types/react-dom": "^18.2.15",
+    "@types/js-cookie": "^3.0.6",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^8.53.0",
+    "eslint-config-next": "^14.0.0",
+    "postcss": "^8.4.31",
+    "tailwindcss": "^3.3.5",
+    "typescript": "^5.2.2"
+  },
+  "keywords": ["restaurant", "food-ordering", "mobile-app", "crm", "telegram", "chapa-payment"],
+  "author": "Keeol Burger and Pizza House",
+  "license": "MIT"
+}

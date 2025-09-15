@@ -59,132 +59,83 @@ const MenuPage = () => {
 
   const { isAuthenticated } = useAuth()
 
-  // Mock menu data (in production, fetch from API)
+  // Load menu items from Supabase
   useEffect(() => {
-    const mockMenuItems: MenuItem[] = [
-      {
-        id: '1',
-        name: 'Keeol Special Burger',
-        description: 'Our signature double beef patty with special sauce, lettuce, tomato, and cheese',
-        price: 450,
-        image: '/images/burger-special.jpg',
-        category: 'burgers',
-        tags: ['signature', 'popular', 'best-seller'],
-        rating: 4.8,
-        prepTime: 15,
-        calories: 680,
-        isVegetarian: false,
-        isSpicy: false,
-        isPopular: true,
-        ingredients: ['Beef Patty', 'Special Sauce', 'Lettuce', 'Tomato', 'Cheese', 'Bun'],
-        allergens: ['Gluten', 'Dairy'],
-        available: true
-      },
-      {
-        id: '2',
-        name: 'Margherita Pizza',
-        description: 'Classic Italian pizza with fresh mozzarella, tomato sauce, and basil',
-        price: 380,
-        image: '/images/pizza-margherita.jpg',
-        category: 'pizzas',
-        tags: ['classic', 'vegetarian', 'italian'],
-        rating: 4.9,
-        prepTime: 20,
-        calories: 520,
-        isVegetarian: true,
-        isSpicy: false,
-        isPopular: true,
-        ingredients: ['Mozzarella', 'Tomato Sauce', 'Fresh Basil', 'Pizza Dough'],
-        allergens: ['Gluten', 'Dairy'],
-        available: true
-      },
-      {
-        id: '3',
-        name: 'Spicy Chicken Wings',
-        description: 'Crispy chicken wings with our signature spicy sauce',
-        price: 320,
-        image: '/images/chicken-wings.jpg',
-        category: 'appetizers',
-        tags: ['spicy', 'crispy', 'finger-food'],
-        rating: 4.6,
-        prepTime: 12,
-        calories: 450,
-        isVegetarian: false,
-        isSpicy: true,
-        isPopular: false,
-        ingredients: ['Chicken Wings', 'Spicy Sauce', 'Celery'],
-        allergens: ['None'],
-        available: true
-      },
-      {
-        id: '4',
-        name: 'Veggie Delight Pizza',
-        description: 'Loaded with fresh vegetables, mushrooms, and bell peppers',
-        price: 420,
-        image: '/images/pizza-veggie.jpg',
-        category: 'pizzas',
-        tags: ['vegetarian', 'healthy', 'colorful'],
-        rating: 4.4,
-        prepTime: 18,
-        calories: 380,
-        isVegetarian: true,
-        isSpicy: false,
-        isPopular: false,
-        ingredients: ['Mixed Vegetables', 'Mushrooms', 'Bell Peppers', 'Mozzarella'],
-        allergens: ['Gluten', 'Dairy'],
-        available: true
-      },
-      {
-        id: '5',
-        name: 'Ethiopian Coffee',
-        description: 'Premium Ethiopian coffee beans, freshly brewed',
-        price: 80,
-        image: '/images/coffee.jpg',
-        category: 'beverages',
-        tags: ['hot', 'caffeine', 'local', 'organic'],
-        rating: 4.7,
-        prepTime: 5,
-        calories: 5,
-        isVegetarian: true,
-        isSpicy: false,
-        isPopular: true,
-        ingredients: ['Ethiopian Coffee Beans', 'Water'],
-        allergens: ['None'],
-        available: true
-      },
-      {
-        id: '6',
-        name: 'Chocolate Milkshake',
-        description: 'Rich and creamy chocolate milkshake topped with whipped cream',
-        price: 150,
-        image: '/images/milkshake.jpg',
-        category: 'beverages',
-        tags: ['cold', 'sweet', 'creamy', 'dessert'],
-        rating: 4.5,
-        prepTime: 8,
-        calories: 320,
-        isVegetarian: true,
-        isSpicy: false,
-        isPopular: false,
-        ingredients: ['Milk', 'Chocolate Syrup', 'Ice Cream', 'Whipped Cream'],
-        allergens: ['Dairy'],
-        available: true
-      }
-    ]
-
-    setTimeout(() => {
-      setMenuItems(mockMenuItems)
-      setIsLoading(false)
-    }, 1000)
+    loadMenuItems()
+    loadCategories()
   }, [])
 
-  const categories = [
-    { id: 'all', name: 'All Items', count: menuItems.length },
-    { id: 'burgers', name: 'Burgers', count: menuItems.filter(item => item.category === 'burgers').length },
-    { id: 'pizzas', name: 'Pizzas', count: menuItems.filter(item => item.category === 'pizzas').length },
-    { id: 'appetizers', name: 'Appetizers', count: menuItems.filter(item => item.category === 'appetizers').length },
-    { id: 'beverages', name: 'Beverages', count: menuItems.filter(item => item.category === 'beverages').length },
-  ]
+  const loadCategories = async () => {
+    try {
+      const response = await fetch('/api/categories')
+      if (response.ok) {
+        const result = await response.json()
+        if (result.success) {
+          const categoryData = result.data.map((cat: any) => ({
+            id: cat.slug,
+            name: cat.name,
+            count: 0 // Will be updated when items load
+          }))
+          setCategories([
+            { id: 'all', name: 'All Items', count: 0 },
+            ...categoryData
+          ])
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load categories:', error)
+    }
+  }
+
+  const loadMenuItems = async () => {
+    try {
+      setIsLoading(true)
+      const response = await fetch('/api/menu')
+      if (response.ok) {
+        const result = await response.json()
+        if (result.success) {
+          const items = result.data.map((item: any) => ({
+            id: item.id,
+            name: item.name,
+            description: item.description,
+            price: item.price,
+            image: item.image || '',
+            category: item.categoryName?.toLowerCase() || 'other',
+            tags: item.tags || [],
+            rating: item.rating || 4.5,
+            prepTime: item.prepTime,
+            calories: item.calories,
+            isVegetarian: item.isVegetarian,
+            isSpicy: item.isSpicy,
+            isPopular: item.isPopular,
+            ingredients: item.ingredients || [],
+            allergens: item.allergens || [],
+            available: item.isAvailable
+          }))
+          setMenuItems(items)
+
+          // Update category counts
+          setCategories(prev => prev.map(cat => ({
+            ...cat,
+            count: cat.id === 'all' ? items.length : items.filter((item: any) => item.category === cat.id).length
+          })))
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load menu items:', error)
+      toast.error('Failed to load menu items')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const [categories, setCategories] = useState([
+    { id: 'all', name: 'All Items', count: 0 },
+    { id: 'burgers', name: 'Burgers', count: 0 },
+    { id: 'pizzas', name: 'Pizzas', count: 0 },
+    { id: 'appetizers', name: 'Appetizers', count: 0 },
+    { id: 'beverages', name: 'Beverages', count: 0 },
+  ])
 
   const availableTags = [
     { id: 'popular', name: 'Popular', icon: Award },

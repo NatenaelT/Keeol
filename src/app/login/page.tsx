@@ -107,36 +107,6 @@ const LoginPage = () => {
     setIsLoading(false)
   }
 
-  const handleOtpSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!otp.trim() || otp.length !== 6) {
-      toast.error('Please enter the 6-digit OTP')
-      return
-    }
-
-    setIsLoading(true)
-    const success = await login(phoneNumber, otp)
-    
-    if (success) {
-      router.push('/')
-    }
-    
-    setIsLoading(false)
-  }
-
-  const handleResendOtp = async () => {
-    if (countdown > 0) return
-    
-    setIsLoading(true)
-    const success = await sendOTP(phoneNumber)
-    
-    if (success) {
-      setCountdown(60)
-      toast.success('OTP resent!')
-    }
-    
-    setIsLoading(false)
-  }
 
   const handleTelegramLogin = async (user: any) => {
     setIsLoading(true)

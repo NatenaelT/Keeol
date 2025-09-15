@@ -42,10 +42,23 @@ const LoginPage = () => {
     const script = document.createElement('script')
     script.src = 'https://telegram.org/js/telegram-widget.js?22'
     script.async = true
+    script.setAttribute('data-telegram-login', process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'keeolburgerbot')
+    script.setAttribute('data-size', 'large')
+    script.setAttribute('data-auth-url', `${window.location.origin}/api/auth/telegram-login`)
+    script.setAttribute('data-request-access', 'write')
+    script.onload = () => {
+      // Create a global callback function for Telegram login
+      (window as any).onTelegramAuth = handleTelegramCallback
+    }
+
     document.body.appendChild(script)
 
     return () => {
-      document.body.removeChild(script)
+      try {
+        document.body.removeChild(script)
+      } catch (e) {
+        // Script might already be removed
+      }
     }
   }, [])
 
@@ -108,15 +121,37 @@ const LoginPage = () => {
   }
 
 
-  const handleTelegramLogin = async (user: any) => {
+  const handleTelegramCallback = async (user: any) => {
+    console.log('Telegram callback received:', user)
     setIsLoading(true)
-    const success = await loginWithTelegram(user)
-    
-    if (success) {
-      router.push('/')
+
+    try {
+      const response = await fetch('/api/auth/telegram-login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(user),
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        toast.success(`Welcome, ${data.user.name}!`)
+        router.push('/')
+      } else {
+        toast.error(data.message || 'Telegram login failed')
+      }
+    } catch (error) {
+      console.error('Telegram login error:', error)
+      toast.error('Telegram login failed. Please try again.')
     }
-    
+
     setIsLoading(false)
+  }
+
+  const handleTelegramLogin = async (user: any) => {
+    await handleTelegramCallback(user)
   }
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -201,41 +236,55 @@ const LoginPage = () => {
           <div className="mt-8 pt-6 border-t border-gray-200">
             <div className="text-center">
               <p className="text-sm text-gray-600 mb-4">Or continue with</p>
-              
+
               <div className="flex justify-center">
-                <div
-                  id="telegram-login-widget"
-                  className="telegram-login-widget"
-                  data-telegram-login="keeolburgerbot"
-                  data-size="large"
-                  data-auth-url={`${window.location.origin}/api/auth/telegram-login`}
-                  data-request-access="write"
-                >
+                <div id="telegram-login-container" className="w-full">
+                  {/* Telegram widget will be inserted here */}
+                  <div
+                    id="telegram-login-keeolburgerbot"
+                    className="telegram-login-widget w-full"
+                  ></div>
+
+                  {/* Fallback button */}
                   <button
                     onClick={() => {
-                      // Fallback Telegram login button
-                      toast('Telegram login will be available once the bot is configured', {
-                        icon: 'ℹ️',
-                      })
+                      window.open(
+                        `https://t.me/${process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'keeolburgerbot'}?start=login`,
+                        '_blank'
+                      )
                     }}
-                    className="flex items-center justify-center space-x-2 w-full py-3 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+                    className="flex items-center justify-center space-x-2 w-full py-3 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200 mt-3"
                   >
                     <MessageCircle className="w-5 h-5 text-blue-500" />
-                    <span className="text-gray-700">Continue with Telegram</span>
+                    <span className="text-gray-700">Open Telegram Bot</span>
                   </button>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Help Text */}
+          {/* Sign Up / Sign In Toggle */}
           <div className="mt-6 text-center text-sm text-gray-600">
             <p>
               New to Keeol Burger?{' '}
               <Link href="/register" className="text-brand-red hover:text-brand-red-dark font-medium">
-                Create account
+                Sign Up
               </Link>
             </p>
+            <div className="mt-4 flex items-center justify-center space-x-4">
+              <Link
+                href="/login"
+                className="px-6 py-2 bg-brand-red text-white rounded-lg hover:bg-brand-red-dark transition-colors font-medium"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/register"
+                className="px-6 py-2 border border-brand-red text-brand-red rounded-lg hover:bg-brand-red hover:text-white transition-colors font-medium"
+              >
+                Sign Up
+              </Link>
+            </div>
           </div>
         </div>
 

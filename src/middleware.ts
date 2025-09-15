@@ -146,7 +146,8 @@ function getTokenFromRequest(request: NextRequest): string | null {
 }
 
 function redirectToLogin(request: NextRequest): NextResponse {
-  const loginUrl = new URL('/login', request.url)
+  const loginUrl = new URL('/auth', request.url)
+  loginUrl.searchParams.set('mode', 'signin')
   loginUrl.searchParams.set('redirect', request.nextUrl.pathname)
   return NextResponse.redirect(loginUrl)
 }

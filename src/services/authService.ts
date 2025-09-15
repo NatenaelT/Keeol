@@ -245,7 +245,7 @@ class AuthService {
   /**
    * Update last login timestamp
    */
-  private async updateLastLogin(userId: string): Promise<void> {
+  async updateLastLogin(userId: string): Promise<void> {
     try {
       await this.updateUser(userId, { last_login: new Date().toISOString() })
     } catch (error) {

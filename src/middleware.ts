@@ -14,8 +14,10 @@ const routePermissions: Record<string, string[]> = {
   '/profile': ['customer', 'waiter', 'chef', 'delivery', 'operation_manager', 'admin', 'owner'],
   '/orders': ['customer', 'waiter', 'chef', 'delivery', 'operation_manager', 'admin', 'owner'],
   '/track': ['customer', 'waiter', 'delivery', 'operation_manager', 'admin', 'owner'],
+  '/loyalty': ['customer', 'waiter', 'chef', 'delivery', 'operation_manager', 'admin', 'owner'],
   '/checkout': ['customer'],
   '/payment': ['customer'],
+  '/settings': ['customer', 'waiter', 'chef', 'delivery', 'operation_manager', 'admin', 'owner'],
   
   // Staff routes
   '/staff': ['waiter', 'chef', 'delivery', 'operation_manager', 'admin', 'owner'],

@@ -204,112 +204,43 @@ const LoginPage = () => {
             <p className="text-gray-600 mt-2">Sign in to your account</p>
           </div>
 
-          {step === 'phone' ? (
-            <form onSubmit={handlePhoneSubmit} className="space-y-6">
-              <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                  Phone Number
-                </label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input
-                    id="phone"
-                    type="tel"
-                    value={phoneNumber}
-                    onChange={handlePhoneChange}
-                    placeholder="+251 91 123 4567"
-                    className="input-field pl-11"
-                    required
-                  />
-                </div>
-                <p className="text-xs text-gray-500 mt-2">
-                  We'll send you a verification code via SMS
-                </p>
+          <form onSubmit={handlePhoneSubmit} className="space-y-6">
+            <div>
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+                Phone Number
+              </label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  id="phone"
+                  type="tel"
+                  value={phoneNumber}
+                  onChange={handlePhoneChange}
+                  placeholder="+251 91 123 4567"
+                  className="input-field pl-11"
+                  required
+                />
               </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Enter your phone number to sign in instantly
+              </p>
+            </div>
 
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full btn-primary flex items-center justify-center space-x-2"
-              >
-                {isLoading ? (
-                  <div className="loading-spinner w-5 h-5"></div>
-                ) : (
-                  <>
-                    <span>Send OTP</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
-              </button>
-            </form>
-          ) : (
-            <form onSubmit={handleOtpSubmit} className="space-y-6">
-              <div>
-                <label htmlFor="otp" className="block text-sm font-medium text-gray-700 mb-2">
-                  Verification Code
-                </label>
-                <div className="relative">
-                  <Shield className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input
-                    id="otp"
-                    type={showOtp ? 'text' : 'password'}
-                    value={otp}
-                    onChange={handleOtpChange}
-                    placeholder="123456"
-                    className="input-field pl-11 pr-11 text-center text-lg tracking-widest"
-                    maxLength={6}
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowOtp(!showOtp)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    {showOtp ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                  </button>
-                </div>
-                <p className="text-xs text-gray-500 mt-2">
-                  Enter the 6-digit code sent to {phoneNumber}
-                </p>
-              </div>
-
-              <button
-                type="submit"
-                disabled={isLoading || otp.length !== 6}
-                className="w-full btn-primary flex items-center justify-center space-x-2"
-              >
-                {isLoading ? (
-                  <div className="loading-spinner w-5 h-5"></div>
-                ) : (
-                  <>
-                    <span>Verify & Sign In</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
-              </button>
-
-              <div className="text-center">
-                <button
-                  type="button"
-                  onClick={handleResendOtp}
-                  disabled={countdown > 0 || isLoading}
-                  className="text-sm text-brand-red hover:text-brand-red-dark disabled:text-gray-400 disabled:cursor-not-allowed"
-                >
-                  {countdown > 0 ? `Resend in ${countdown}s` : 'Resend OTP'}
-                </button>
-              </div>
-
-              <div className="text-center">
-                <button
-                  type="button"
-                  onClick={() => setStep('phone')}
-                  className="text-sm text-gray-600 hover:text-gray-900"
-                >
-                  Change phone number
-                </button>
-              </div>
-            </form>
-          )}
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full btn-primary flex items-center justify-center space-x-2"
+            >
+              {isLoading ? (
+                <div className="loading-spinner w-5 h-5"></div>
+              ) : (
+                <>
+                  <span>Sign In</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
+          </form>
 
           {/* Telegram Login */}
           <div className="mt-8 pt-6 border-t border-gray-200">

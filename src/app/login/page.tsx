@@ -3,12 +3,9 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { 
-  Phone, 
-  Shield, 
-  ArrowRight, 
-  Eye, 
-  EyeOff,
+import {
+  Phone,
+  ArrowRight,
   MessageCircle,
   ChefHat
 } from 'lucide-react'

@@ -1,85 +1,69 @@
 import { NextRequest, NextResponse } from 'next/server'
-import jwt from 'jsonwebtoken'
+import { authService } from '@/services/authService'
+import { cookies } from 'next/headers'
 import crypto from 'crypto'
 
-// Mock user database
-const users = new Map()
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN!
 
 export async function POST(request: NextRequest) {
   try {
-    const { telegramData } = await request.json()
-
-    if (!telegramData) {
-      return NextResponse.json(
-        { message: 'Telegram data is required' },
-        { status: 400 }
-      )
-    }
+    const telegramData = await request.json()
 
     // Verify Telegram authentication data
-    const isValid = verifyTelegramAuth(telegramData)
-    if (!isValid) {
+    if (!verifyTelegramAuth(telegramData)) {
       return NextResponse.json(
-        { message: 'Invalid Telegram authentication data' },
+        { success: false, message: 'Invalid Telegram authentication' },
         { status: 400 }
       )
     }
 
-    const telegramId = telegramData.id.toString()
-    const username = telegramData.username || `user_${telegramId}`
+    const telegramId = parseInt(telegramData.id.toString())
     const firstName = telegramData.first_name || ''
     const lastName = telegramData.last_name || ''
-    const fullName = `${firstName} ${lastName}`.trim() || username
+    const username = telegramData.username || ''
+    const fullName = `${firstName} ${lastName}`.trim() || username || `User ${telegramId}`
 
-    // Find existing user by Telegram ID
-    let user = Array.from(users.values()).find(u => u.telegramId === telegramId)
+    // Find user by Telegram ID
+    let user = await authService.findUserByTelegramId(telegramId)
 
     if (!user) {
       // Create new user
-      user = {
-        id: Date.now().toString(),
-        phoneNumber: null, // Will be set when user adds phone number
+      user = await authService.createUser({
         telegramId,
-        username,
         name: fullName,
-        role: 'customer',
-        avatar: telegramData.photo_url || null,
-        isActive: true,
-        createdAt: new Date().toISOString(),
-        permissions: ['order.create', 'order.view', 'order.track', 'profile.edit']
-      }
-      users.set(user.id, user)
+        role: 'customer'
+      })
+    } else {
+      // Update user info
+      await authService.updateUser(user.id, {
+        name: fullName,
+        telegram_id: telegramId
+      })
     }
 
-    // Update user info from Telegram
-    user.username = username
-    user.name = fullName
-    user.avatar = telegramData.photo_url || user.avatar
-    user.lastLogin = new Date().toISOString()
+    // Update last login
+    await authService.updateLastLogin(user.id)
 
-    // Generate JWT token
-    const token = jwt.sign(
-      { 
-        userId: user.id,
-        telegramId: user.telegramId,
-        role: user.role 
-      },
-      process.env.JWT_SECRET || 'fallback-secret-key',
-      { expiresIn: '7d' }
-    )
+    // Generate session token
+    const token = authService.generateSessionToken(user)
+
+    // Set secure cookie
+    const cookieStore = cookies()
+    cookieStore.set('auth_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 // 7 days
+    })
 
     return NextResponse.json({
+      success: true,
       message: 'Telegram login successful',
       user: {
         id: user.id,
-        phoneNumber: user.phoneNumber,
-        telegramId: user.telegramId,
         name: user.name,
-        role: user.role,
-        avatar: user.avatar,
-        isActive: user.isActive,
-        createdAt: user.createdAt,
-        permissions: user.permissions
+        telegramId: user.telegramId,
+        role: user.role
       },
       token
     })
@@ -87,45 +71,43 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Telegram login error:', error)
     return NextResponse.json(
-      { message: 'Internal server error' },
+      { success: false, message: 'Telegram login failed. Please try again.' },
       { status: 500 }
     )
   }
 }
 
-function verifyTelegramAuth(telegramData: any): boolean {
+function verifyTelegramAuth(data: any): boolean {
   try {
-    const botToken = process.env.TELEGRAM_BOT_TOKEN
-    if (!botToken) {
-      console.warn('TELEGRAM_BOT_TOKEN not configured')
-      return true // For development, skip verification
-    }
+    const { hash, ...authData } = data
+    
+    if (!hash) return false
 
-    // Extract hash from telegram data
-    const { hash, ...dataToCheck } = telegramData
-
-    // Create data check string
-    const dataCheckString = Object.keys(dataToCheck)
+    // Create data string
+    const dataCheckString = Object.keys(authData)
       .sort()
-      .map(key => `${key}=${dataToCheck[key]}`)
+      .map(key => `${key}=${authData[key]}`)
       .join('\n')
 
-    // Create secret key from bot token
-    const secretKey = crypto
-      .createHash('sha256')
-      .update(botToken)
-      .digest()
+    // Create secret key
+    const secretKey = crypto.createHash('sha256').update(TELEGRAM_BOT_TOKEN).digest()
 
-    // Create hash of data check string
-    const hmac = crypto
-      .createHmac('sha256', secretKey)
-      .update(dataCheckString)
-      .digest('hex')
+    // Create hash
+    const computedHash = crypto.createHmac('sha256', secretKey).update(dataCheckString).digest('hex')
 
-    // Compare hashes
-    return hmac === hash
+    // Verify hash
+    return hash === computedHash
   } catch (error) {
     console.error('Telegram auth verification error:', error)
     return false
   }
+}
+
+// Handle GET request for testing
+export async function GET() {
+  return NextResponse.json({ 
+    status: 'Telegram login endpoint is running',
+    botUsername: process.env.TELEGRAM_BOT_USERNAME,
+    timestamp: new Date().toISOString()
+  })
 }

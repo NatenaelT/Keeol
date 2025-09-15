@@ -172,7 +172,7 @@ class AuthService {
   /**
    * Find user by Telegram ID
    */
-  private async findUserByTelegramId(telegramId: number): Promise<User | null> {
+  async findUserByTelegramId(telegramId: number): Promise<User | null> {
     try {
       const { data, error } = await supabase
         .from('users')

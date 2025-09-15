@@ -22,7 +22,6 @@ export const metadata: Metadata = {
   description: 'Delicious burgers and pizzas delivered fresh to your door',
   keywords: ['burger', 'pizza', 'restaurant', 'food delivery', 'Ethiopian food'],
   authors: [{ name: 'Keeol Burger Team' }],
-  viewport: 'width=device-width, initial-scale=1.0',
   robots: 'index, follow',
   openGraph: {
     title: 'Keeol Burger & Pizza House',
@@ -31,6 +30,11 @@ export const metadata: Metadata = {
     locale: 'en_US',
     siteName: 'Keeol Burger',
   },
+}
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1.0,
 }
 
 export default function RootLayout({

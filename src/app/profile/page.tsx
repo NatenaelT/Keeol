@@ -87,44 +87,53 @@ const ProfilePage = () => {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    if (user) {
+    if (user && isAuthenticated) {
       fetchUserProfile()
       fetchLoyaltyData()
       fetchRewards()
+    } else if (!isAuthenticated) {
+      setIsLoading(false)
     }
-  }, [user])
+  }, [user, isAuthenticated])
 
   const fetchUserProfile = async () => {
     try {
-      // Mock profile data - in production, fetch from API
-      const mockProfile: UserProfile = {
-        id: user?.id || '',
-        name: user?.name || '',
-        email: user?.email || '',
-        phone_number: user?.phoneNumber || '',
-        role: user?.role || '',
-        loyalty_points: user?.loyaltyPoints || 0,
-        loyalty_tier: user?.loyaltyTier || 'Bronze',
-        created_at: user?.createdAt || new Date().toISOString(),
-        last_login: new Date().toISOString()
+      if (!user) {
+        setIsLoading(false)
+        return
       }
-      
-      setProfile(mockProfile)
+
+      // Use real user data from auth context
+      const userProfile: UserProfile = {
+        id: user.id,
+        name: user.name,
+        email: user.email || '',
+        phone_number: user.phoneNumber,
+        role: user.role,
+        loyalty_points: user.loyaltyPoints || 0,
+        loyalty_tier: user.loyaltyTier || 'Bronze',
+        created_at: user.createdAt,
+        last_login: user.lastLogin || new Date().toISOString()
+      }
+
+      setProfile(userProfile)
       setEditForm({
-        name: mockProfile.name,
-        email: mockProfile.email || ''
+        name: userProfile.name,
+        email: userProfile.email || ''
       })
     } catch (error) {
       console.error('Failed to fetch profile:', error)
+      toast.error('Failed to load profile data')
     }
   }
 
   const fetchLoyaltyData = async () => {
     try {
-      // Mock loyalty data
-      const tier = user?.loyaltyTier || 'Bronze'
-      const points = user?.loyaltyPoints || 0
-      
+      if (!user) return
+
+      const tier = user.loyaltyTier || 'Bronze'
+      const points = user.loyaltyPoints || 0
+
       const tierRequirements = {
         Bronze: 1000,
         Silver: 2500,
@@ -137,11 +146,11 @@ const ProfilePage = () => {
       const nextRequirement = tierRequirements[nextTier as keyof typeof tierRequirements] || 10000
 
       setLoyaltyStats({
-        totalEarned: points + 450, // Mock total earned
-        totalSpent: 120, // Mock total spent
+        totalEarned: points + Math.floor(points * 0.8), // Estimated total earned
+        totalSpent: Math.floor(points * 0.2), // Estimated total spent
         currentBalance: points,
         tier,
-        tierProgress: Math.min((points / nextRequirement) * 100, 100),
+        tierProgress: tier === 'Platinum' ? 100 : Math.min((points / nextRequirement) * 100, 100),
         nextTierRequirement: nextRequirement
       })
 
@@ -233,16 +242,34 @@ const ProfilePage = () => {
 
   const handleSaveProfile = async () => {
     try {
+      if (!profile) return
+
       // In production, this would make an API call to update the profile
-      setProfile(prev => prev ? {
-        ...prev,
-        name: editForm.name,
-        email: editForm.email
-      } : null)
-      
-      setIsEditing(false)
-      toast.success('Profile updated successfully!')
+      const response = await fetch('/api/profile/update', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: editForm.name,
+          email: editForm.email
+        }),
+      })
+
+      if (response.ok) {
+        setProfile(prev => prev ? {
+          ...prev,
+          name: editForm.name,
+          email: editForm.email
+        } : null)
+
+        setIsEditing(false)
+        toast.success('Profile updated successfully!')
+      } else {
+        throw new Error('Failed to update profile')
+      }
     } catch (error) {
+      console.error('Profile update error:', error)
       toast.error('Failed to update profile')
     }
   }
@@ -301,7 +328,10 @@ const ProfilePage = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Please sign in to view your profile</h2>
-          <a href="/login" className="btn-primary">Sign In</a>
+          <div className="space-x-4">
+            <a href="/auth?mode=signin" className="btn-primary">Sign In</a>
+            <a href="/auth?mode=signup" className="btn-outline">Sign Up</a>
+          </div>
         </div>
       </div>
     )
@@ -395,24 +425,24 @@ const ProfilePage = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex items-center space-x-3">
                       <Phone className="w-5 h-5 text-gray-400" />
-                      <span className="text-gray-900">{profile?.phone_number}</span>
+                      <span className="text-gray-900">{profile?.phone_number || 'Not provided'}</span>
                     </div>
-                    {profile?.email && (
-                      <div className="flex items-center space-x-3">
-                        <Mail className="w-5 h-5 text-gray-400" />
-                        <span className="text-gray-900">{profile.email}</span>
-                      </div>
-                    )}
+                    <div className="flex items-center space-x-3">
+                      <Mail className="w-5 h-5 text-gray-400" />
+                      <span className="text-gray-900">{profile?.email || 'Not provided'}</span>
+                    </div>
                     <div className="flex items-center space-x-3">
                       <Calendar className="w-5 h-5 text-gray-400" />
-                      <span className="text-gray-900">Joined {formatDate(profile?.created_at || '')}</span>
+                      <span className="text-gray-900">
+                        Joined {profile?.created_at ? formatDate(profile.created_at) : 'Recently'}
+                      </span>
                     </div>
-                    {profile?.last_login && (
-                      <div className="flex items-center space-x-3">
-                        <Clock className="w-5 h-5 text-gray-400" />
-                        <span className="text-gray-900">Last login {formatDate(profile.last_login)}</span>
-                      </div>
-                    )}
+                    <div className="flex items-center space-x-3">
+                      <Clock className="w-5 h-5 text-gray-400" />
+                      <span className="text-gray-900">
+                        Last login {profile?.last_login ? formatDate(profile.last_login) : 'Today'}
+                      </span>
+                    </div>
                   </div>
                 </div>
               )}

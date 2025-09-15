@@ -329,7 +329,7 @@ const Header = () => {
             ) : (
               <div className="flex items-center space-x-4">
                 <Link
-                  href="/login"
+                  href="/auth?mode=signin"
                   className={`text-sm font-medium transition-colors duration-200 ${
                     scrolled
                       ? 'text-gray-900 hover:text-brand-red'
@@ -337,6 +337,16 @@ const Header = () => {
                   }`}
                 >
                   Sign In
+                </Link>
+                <Link
+                  href="/auth?mode=signup"
+                  className={`text-sm font-medium transition-colors duration-200 ml-4 ${
+                    scrolled
+                      ? 'text-gray-900 hover:text-brand-red'
+                      : 'text-white hover:text-brand-yellow'
+                  }`}
+                >
+                  Sign Up
                 </Link>
                 <Link
                   href="/menu"
@@ -394,11 +404,18 @@ const Header = () => {
                 {!isAuthenticated && (
                   <>
                     <Link
-                      href="/login"
+                      href="/auth?mode=signin"
                       className="block px-4 py-2 text-gray-900 hover:bg-gray-100 rounded-lg mx-2"
                       onClick={() => setIsOpen(false)}
                     >
                       Sign In
+                    </Link>
+                    <Link
+                      href="/auth?mode=signup"
+                      className="block px-4 py-2 text-gray-900 hover:bg-gray-100 rounded-lg mx-2"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      Sign Up
                     </Link>
                     <Link
                       href="/menu"

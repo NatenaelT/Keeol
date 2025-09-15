@@ -193,7 +193,7 @@ class AuthService {
   /**
    * Create new user
    */
-  private async createUser(userData: {
+  async createUser(userData: {
     phoneNumber?: string
     telegramId?: number
     name: string

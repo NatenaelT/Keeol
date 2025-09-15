@@ -64,28 +64,39 @@ export function middleware(request: NextRequest) {
   }
   
   try {
-    // Verify JWT token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret-key') as any
-    const userRole = decoded.role
-    
+    // Decode our simplified token format: header.payload.signature
+    const parts = token.split('.')
+    if (parts.length !== 3) {
+      return redirectToLogin(request)
+    }
+
+    const payload = JSON.parse(atob(parts[1]))
+    const userRole = payload.role
+
+    // Basic token validation - check if it's not too old (24 hours)
+    const tokenAge = Date.now() - (payload.iat || 0)
+    if (tokenAge > 24 * 60 * 60 * 1000) {
+      return redirectToLogin(request)
+    }
+
     // Check if user has required role
     if (!requiredRoles.includes(userRole)) {
       return new NextResponse('Forbidden', { status: 403 })
     }
-    
+
     // Add user info to headers for API routes
     const requestHeaders = new Headers(request.headers)
-    requestHeaders.set('x-user-id', decoded.userId)
-    requestHeaders.set('x-user-role', decoded.role)
-    requestHeaders.set('x-phone-number', decoded.phoneNumber || '')
-    requestHeaders.set('x-telegram-id', decoded.telegramId || '')
-    
+    requestHeaders.set('x-user-id', payload.userId || '')
+    requestHeaders.set('x-user-role', payload.role || '')
+    requestHeaders.set('x-phone-number', payload.phoneNumber || '')
+    requestHeaders.set('x-telegram-id', payload.telegramId || '')
+
     return NextResponse.next({
       request: {
         headers: requestHeaders,
       },
     })
-    
+
   } catch (error) {
     // Invalid token
     return redirectToLogin(request)

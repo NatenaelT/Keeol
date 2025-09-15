@@ -27,7 +27,7 @@ const LoginPage = () => {
   const [phoneNumber, setPhoneNumber] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   
-  const { login, loginWithTelegram, sendOTP, isAuthenticated, isLoading: authLoading } = useAuth()
+  const { loginWithTelegram, isAuthenticated, isLoading: authLoading } = useAuth()
   const router = useRouter()
 
   // Redirect if already authenticated
@@ -36,14 +36,6 @@ const LoginPage = () => {
       router.push('/')
     }
   }, [isAuthenticated, router])
-
-  // Countdown timer for OTP resend
-  useEffect(() => {
-    if (countdown > 0) {
-      const timer = setTimeout(() => setCountdown(countdown - 1), 1000)
-      return () => clearTimeout(timer)
-    }
-  }, [countdown])
 
   // Load Telegram login widget script
   useEffect(() => {

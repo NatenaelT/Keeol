@@ -70,20 +70,34 @@ export function middleware(request: NextRequest) {
     // Decode our simplified token format: header.payload.signature
     const parts = token.split('.')
     if (parts.length !== 3) {
+      console.log('Invalid token format:', token.substring(0, 50) + '...')
       return redirectToLogin(request)
     }
 
-    const payload = JSON.parse(atob(parts[1]))
+    let payload
+    try {
+      payload = JSON.parse(atob(parts[1]))
+    } catch (e) {
+      console.log('Failed to parse token payload')
+      return redirectToLogin(request)
+    }
+
     const userRole = payload.role
+    if (!userRole) {
+      console.log('Token missing role')
+      return redirectToLogin(request)
+    }
 
     // Basic token validation - check if it's not too old (24 hours)
     const tokenAge = Date.now() - (payload.iat || 0)
     if (tokenAge > 24 * 60 * 60 * 1000) {
+      console.log('Token expired')
       return redirectToLogin(request)
     }
 
     // Check if user has required role
     if (!requiredRoles.includes(userRole)) {
+      console.log(`Access denied. User role: ${userRole}, Required: ${requiredRoles.join(', ')}`)
       return new NextResponse('Forbidden', { status: 403 })
     }
 
@@ -102,6 +116,7 @@ export function middleware(request: NextRequest) {
 
   } catch (error) {
     // Invalid token
+    console.log('Middleware error:', error)
     return redirectToLogin(request)
   }
 }

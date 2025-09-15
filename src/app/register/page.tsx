@@ -350,14 +350,28 @@ const RegisterPage = () => {
             </form>
           )}
 
-          {/* Sign In Link */}
+          {/* Sign In / Sign Up Toggle */}
           <div className="mt-6 text-center text-sm text-gray-600">
             <p>
               Already have an account?{' '}
               <Link href="/login" className="text-brand-red hover:text-brand-red-dark font-medium">
-                Sign in
+                Sign In
               </Link>
             </p>
+            <div className="mt-4 flex items-center justify-center space-x-4">
+              <Link
+                href="/login"
+                className="px-6 py-2 border border-brand-red text-brand-red rounded-lg hover:bg-brand-red hover:text-white transition-colors font-medium"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/register"
+                className="px-6 py-2 bg-brand-red text-white rounded-lg hover:bg-brand-red-dark transition-colors font-medium"
+              >
+                Sign Up
+              </Link>
+            </div>
           </div>
         </div>
 

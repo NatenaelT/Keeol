@@ -124,10 +124,6 @@ const LoginPage = () => {
     setPhoneNumber(formatted)
   }
 
-  const handleOtpChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, '').slice(0, 6)
-    setOtp(value)
-  }
 
   if (authLoading) {
     return (

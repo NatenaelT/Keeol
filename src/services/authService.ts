@@ -291,7 +291,7 @@ class AuthService {
   /**
    * Generate session token
    */
-  private generateSessionToken(user: User): string {
+  generateSessionToken(user: User): string {
     // In production, use proper JWT library
     const payload = {
       userId: user.id,

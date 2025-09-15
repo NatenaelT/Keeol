@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { 
   Phone, 
@@ -30,13 +30,15 @@ const RegisterPage = () => {
   
   const { sendOTP, login, isAuthenticated, isLoading: authLoading } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/')
+      const redirectTo = searchParams.get('redirect') || '/profile'
+      router.push(redirectTo)
     }
-  }, [isAuthenticated, router])
+  }, [isAuthenticated, router, searchParams])
 
   // Countdown timer for OTP resend
   useEffect(() => {
@@ -106,7 +108,8 @@ const RegisterPage = () => {
     
     if (success) {
       toast.success('Account created successfully!')
-      router.push('/')
+      const redirectTo = searchParams.get('redirect') || '/profile'
+      router.push(redirectTo)
     }
     
     setIsLoading(false)

@@ -64,7 +64,12 @@ const AuthPage = () => {
             : `Account created successfully! Welcome, ${result.user.name}!`
         )
         const redirectTo = searchParams.get('redirect') || '/profile'
-        router.push(redirectTo)
+
+        // Add a small delay to ensure cookie is set before navigation
+        setTimeout(() => {
+          // Use window.location for more reliable navigation after auth
+          window.location.href = redirectTo
+        }, 100)
         return true
       } else {
         toast.error(result.message || `${data.mode === 'signin' ? 'Sign in' : 'Sign up'} failed`)

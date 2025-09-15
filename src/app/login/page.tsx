@@ -35,9 +35,9 @@ const LoginPage = () => {
   useEffect(() => {
     if (isAuthenticated) {
       const redirectTo = searchParams.get('redirect') || '/profile'
-      router.push(redirectTo)
+      window.location.href = redirectTo
     }
-  }, [isAuthenticated, router, searchParams])
+  }, [isAuthenticated, searchParams])
 
   // Load Telegram login widget script
   useEffect(() => {

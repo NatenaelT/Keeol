@@ -27,11 +27,7 @@ declare global {
 }
 
 const LoginPage = () => {
-  const [step, setStep] = useState<'phone' | 'otp'>('phone')
   const [phoneNumber, setPhoneNumber] = useState('')
-  const [otp, setOtp] = useState('')
-  const [showOtp, setShowOtp] = useState(false)
-  const [countdown, setCountdown] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
   
   const { login, loginWithTelegram, sendOTP, isAuthenticated, isLoading: authLoading } = useAuth()

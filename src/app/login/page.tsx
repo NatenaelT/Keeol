@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import {
   Phone,
@@ -29,13 +29,15 @@ const LoginPage = () => {
   
   const { loginWithTelegram, isAuthenticated, isLoading: authLoading } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      router.push('/')
+      const redirectTo = searchParams.get('redirect') || '/profile'
+      router.push(redirectTo)
     }
-  }, [isAuthenticated, router])
+  }, [isAuthenticated, router, searchParams])
 
   // Load Telegram login widget script
   useEffect(() => {
@@ -108,7 +110,8 @@ const LoginPage = () => {
 
       if (response.ok && data.success) {
         toast.success(`Welcome back, ${data.user.name}!`)
-        router.push('/')
+        const redirectTo = searchParams.get('redirect') || '/profile'
+        router.push(redirectTo)
       } else {
         toast.error(data.message || 'Login failed')
       }
@@ -138,7 +141,8 @@ const LoginPage = () => {
 
       if (response.ok && data.success) {
         toast.success(`Welcome, ${data.user.name}!`)
-        router.push('/')
+        const redirectTo = searchParams.get('redirect') || '/profile'
+        router.push(redirectTo)
       } else {
         toast.error(data.message || 'Telegram login failed')
       }

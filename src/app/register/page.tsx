@@ -36,9 +36,9 @@ const RegisterPage = () => {
   useEffect(() => {
     if (isAuthenticated) {
       const redirectTo = searchParams.get('redirect') || '/profile'
-      router.push(redirectTo)
+      window.location.href = redirectTo
     }
-  }, [isAuthenticated, router, searchParams])
+  }, [isAuthenticated, searchParams])
 
   // Countdown timer for OTP resend
   useEffect(() => {

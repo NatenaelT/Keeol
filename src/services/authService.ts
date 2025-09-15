@@ -11,7 +11,10 @@ export interface User {
   avatar?: string
   isActive: boolean
   createdAt: string
+  lastLogin?: string
   permissions: string[]
+  loyaltyPoints: number
+  loyaltyTier: string
 }
 
 // Store OTP temporarily (in production, use Redis or proper storage)
@@ -211,7 +214,10 @@ class AuthService {
           name: userData.name,
           email: userData.email,
           role: userData.role || 'customer',
-          permissions
+          permissions,
+          loyalty_points: 0,
+          loyalty_tier: 'Bronze',
+          is_active: true
         })
         .select()
         .single()
@@ -334,7 +340,10 @@ class AuthService {
       avatar: dbUser.avatar_url,
       isActive: dbUser.is_active,
       createdAt: dbUser.created_at,
-      permissions: dbUser.permissions || []
+      lastLogin: dbUser.last_login,
+      permissions: dbUser.permissions || [],
+      loyaltyPoints: dbUser.loyalty_points || 0,
+      loyaltyTier: dbUser.loyalty_tier || 'Bronze'
     }
   }
 

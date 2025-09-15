@@ -151,7 +151,7 @@ class AuthService {
   /**
    * Find user by phone number
    */
-  private async findUserByPhone(phoneNumber: string): Promise<User | null> {
+  async findUserByPhone(phoneNumber: string): Promise<User | null> {
     try {
       const { data, error } = await supabase
         .from('users')

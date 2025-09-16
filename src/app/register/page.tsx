@@ -104,7 +104,7 @@ const RegisterPage = () => {
     }
 
     setIsLoading(true)
-    const success = await login(formData.phoneNumber, formData.otp)
+    const success = await verifyOTP({ contact: formData.phoneNumber, code: formData.otp, name: formData.name })
     
     if (success) {
       toast.success('Account created successfully!')

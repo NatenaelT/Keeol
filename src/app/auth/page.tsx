@@ -86,12 +86,31 @@ const AuthPage = () => {
 
   if (isAuthenticated) return null
 
+  const handlePasswordLogin = async ({ contact, password }: { contact: string; password: string }) => {
+    setIsLoading(true)
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contact, password })
+      })
+      const result = await res.json()
+      if (!res.ok || !result.success) return false
+      const redirectTo = searchParams.get('redirect') || '/profile'
+      setTimeout(() => router.push(redirectTo), 100)
+      return true
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
     <AuthToggle
       mode={mode}
       onModeChange={handleModeChange}
       onSendCode={handleSendCode}
       onVerifyCode={handleVerifyCode}
+      onPasswordLogin={handlePasswordLogin}
       isLoading={isLoading}
     />
   )

@@ -58,7 +58,7 @@ const ForgotPasswordPage = () => {
       const result = await response.json()
 
       if (response.ok && result.success) {
-        toast.success('Password reset link sent to your phone number!')
+        toast.success(result.message || 'Password reset link sent!')
         setIsSubmitted(true)
       } else {
         toast.error(result.message || 'Failed to send password reset link')

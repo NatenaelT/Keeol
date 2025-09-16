@@ -56,6 +56,7 @@ export interface Database {
           updated_at?: string
           last_login?: string | null
           permissions?: string[]
+          password?: string | null
         }
         Update: {
           id?: string
@@ -70,6 +71,7 @@ export interface Database {
           updated_at?: string
           last_login?: string | null
           permissions?: string[]
+          password?: string | null
         }
       }
       categories: {

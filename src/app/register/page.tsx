@@ -28,7 +28,7 @@ const RegisterPage = () => {
   const [countdown, setCountdown] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
   
-  const { sendOTP, login, isAuthenticated, isLoading: authLoading } = useAuth()
+  const { sendOTP, verifyOTP, isAuthenticated, isLoading: authLoading } = useAuth()
   const router = useRouter()
   const searchParams = useSearchParams()
 

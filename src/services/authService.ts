@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase'
+import { supabase, createServerClient } from '@/lib/supabase'
 import { toast } from 'react-hot-toast'
 import bcrypt from 'bcryptjs'
 
@@ -89,6 +89,27 @@ class AuthService {
     } catch (error) {
       console.error('Telegram login error:', error)
       throw error
+    }
+  }
+
+  /**
+   * Find user by email
+   */
+  async findUserByEmail(email: string): Promise<(User & { password?: string }) | null> {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('email', email)
+        .eq('is_active', true)
+        .single()
+
+      if (error || !data) return null
+
+      return this.mapDatabaseUserToUser(data)
+    } catch (error) {
+      console.error('Find user by email error:', error)
+      return null
     }
   }
 
@@ -255,6 +276,108 @@ class AuthService {
     }
     
     return `header.${btoa(JSON.stringify(payload))}.signature`
+  }
+
+  /**
+   * Send OTP to email or phone (stores code in DB)
+   */
+  async sendOTP(contact: string): Promise<{ channel: 'email'|'phone'; contact: string; expiresAt: string; code?: string }> {
+    const admin = createServerClient()
+    const isEmail = /@/.test(contact)
+    let normalizedContact = contact.trim()
+    let channel: 'email' | 'phone' = 'email'
+
+    if (!isEmail) {
+      channel = 'phone'
+      const digits = contact.replace(/\D/g, '')
+      if (!this.isValidEthiopianPhone(digits)) {
+        throw new Error('Invalid phone number')
+      }
+      // Normalize to +251XXXXXXXXX
+      if (digits.startsWith('251')) normalizedContact = '+' + digits
+      else if (digits.startsWith('0')) normalizedContact = '+251' + digits.slice(1)
+      else if (digits.length === 9) normalizedContact = '+251' + digits
+      else normalizedContact = contact
+    } else {
+      normalizedContact = normalizedContact.toLowerCase()
+    }
+
+    const code = Math.floor(100000 + Math.random() * 900000).toString()
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString()
+
+    const { error } = await admin.from('otps').insert({
+      contact: normalizedContact,
+      channel,
+      code,
+      purpose: 'login',
+      expires_at: expiresAt
+    })
+    if (error) throw error
+
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`OTP for ${normalizedContact} (${channel}): ${code}`)
+    }
+
+    return { channel, contact: normalizedContact, expiresAt, code: process.env.NODE_ENV !== 'production' ? code : undefined }
+  }
+
+  /**
+   * Verify OTP and return user + token. Creates user if not found and name provided (signup flow)
+   */
+  async verifyOTP(params: { contact: string; code: string; name?: string }): Promise<{ user: User; token: string } | null> {
+    const admin = createServerClient()
+    const { contact, code, name } = params
+    const isEmail = /@/.test(contact)
+    const normalized = isEmail ? contact.trim().toLowerCase() : (() => {
+      const digits = contact.replace(/\D/g, '')
+      if (digits.startsWith('251')) return '+' + digits
+      if (digits.startsWith('0')) return '+251' + digits.slice(1)
+      if (digits.length === 9) return '+251' + digits
+      return contact
+    })()
+
+    const { data: otpRow, error: otpError } = await admin
+      .from('otps')
+      .select('*')
+      .eq('contact', normalized)
+      .eq('code', code)
+      .is('consumed_at', null)
+      .gt('expires_at', new Date().toISOString())
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single()
+
+    if (otpError || !otpRow) {
+      return null
+    }
+
+    // Consume the OTP
+    await admin.from('otps').update({ consumed_at: new Date().toISOString() }).eq('id', otpRow.id)
+
+    // Find or create user
+    let user: (User & { password?: string }) | null = null
+    if (isEmail) {
+      user = await this.findUserByEmail(normalized)
+    } else {
+      user = await this.findUserByPhone(normalized)
+    }
+
+    if (!user) {
+      if (!name) {
+        // Require name for new user creation
+        throw new Error('USER_NOT_FOUND')
+      }
+      user = await this.createUser({
+        name: name.trim(),
+        email: isEmail ? normalized : undefined,
+        phoneNumber: isEmail ? undefined : normalized,
+        role: 'customer'
+      })
+    }
+
+    await this.updateLastLogin(user.id)
+    const token = this.generateSessionToken(user)
+    return { user, token }
   }
 
   /**

@@ -189,11 +189,11 @@ const AuthToggle = ({ mode, onModeChange, onSubmit, isLoading = false }: AuthTog
             </div>
 
             <div>
-              <label htmlFor="password" class="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                 Password
               </label>
-              <div class="relative">
-                <Lock class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
@@ -213,7 +213,7 @@ const AuthToggle = ({ mode, onModeChange, onSubmit, isLoading = false }: AuthTog
               </div>
               {mode === 'signin' && (
                 <div className="text-right mt-2">
-                  <Link href="/forgot-password" class="text-sm text-brand-red hover:text-brand-red-dark">
+                  <Link href="/forgot-password" className="text-sm text-brand-red hover:text-brand-red-dark">
                     Forgot password?
                   </Link>
                 </div>

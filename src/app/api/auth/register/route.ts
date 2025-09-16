@@ -4,11 +4,11 @@ import { cookies } from 'next/headers'
 
 export async function POST(request: NextRequest) {
   try {
-    const { phoneNumber, name } = await request.json()
+    const { phoneNumber, name, password } = await request.json()
 
-    if (!phoneNumber || !name) {
+    if (!phoneNumber || !name || !password) {
       return NextResponse.json(
-        { success: false, message: 'Phone number and name are required' },
+        { success: false, message: 'Phone number, name and password are required' },
         { status: 400 }
       )
     }
@@ -35,6 +35,7 @@ export async function POST(request: NextRequest) {
     const user = await authService.createUser({
       phoneNumber,
       name: name.trim(),
+      password,
       role: 'customer'
     })
 

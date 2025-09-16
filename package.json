@@ -1,7 +1,7 @@
 {
   "name": "keeol-burger-system",
   "version": "1.0.0",
-  "description": "Complete restaurant management system for Keeol Burger and Pizza House",
+  "description": "Complete restaurant management system for keol Burger and Pizza House",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -45,6 +45,6 @@
     "telegram",
     "chapa-payment"
   ],
-  "author": "Keeol Burger and Pizza House",
+  "author": "keol Burger and Pizza House",
   "license": "MIT"
 }

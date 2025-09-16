@@ -70,8 +70,8 @@ export function middleware(request: NextRequest) {
     return redirectToLogin(request)
   }
 
-  console.log(`Found token for ${pathname}: ${token.substring(0, 20)}...`)
-  
+  console.log(`Found token for ${pathname}: ${token}`)
+
   try {
     // Decode our simplified token format: header.payload.signature
     const parts = token.split('.')

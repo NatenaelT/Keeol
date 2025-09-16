@@ -51,10 +51,9 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
 }
 
 interface AuthContextType extends AuthState {
-  login: (phoneNumber: string, otp: string) => Promise<boolean>
+  login: (phoneNumber: string, password: string) => Promise<boolean>
   loginWithTelegram: (telegramData: any) => Promise<boolean>
   logout: () => void
-  sendOTP: (phoneNumber: string) => Promise<boolean>
   hasPermission: (permission: string) => boolean
   hasRole: (roles: UserRole | UserRole[]) => boolean
   refreshToken: () => Promise<boolean>
@@ -114,51 +113,30 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }
 
-  const sendOTP = async (phoneNumber: string): Promise<boolean> => {
-    try {
-      dispatch({ type: 'SET_LOADING', payload: true })
-      
-      const success = await authService.sendOTP(phoneNumber)
-      
-      if (success) {
-        toast.success('OTP sent successfully!')
-        return true
-      } else {
-        toast.error('Failed to send OTP. Please try again.')
-        return false
-      }
-    } catch (error: any) {
-      console.error('Send OTP failed:', error)
-      toast.error(error.message || 'Failed to send OTP. Please try again.')
-      return false
-    } finally {
-      dispatch({ type: 'SET_LOADING', payload: false })
-    }
-  }
 
-  const login = async (phoneNumber: string, otp: string): Promise<boolean> => {
+  const login = async (phoneNumber: string, password: string): Promise<boolean> => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true })
-      
-      const result = await authService.verifyOTP(phoneNumber, otp)
-      
+
+      const result = await authService.loginWithPassword(phoneNumber, password)
+
       if (result) {
         const { user, token } = result
-        
+
         // Store token in secure cookie
-        Cookies.set('auth_token', token, { 
+        Cookies.set('auth_token', token, {
           expires: 7, // 7 days
           secure: process.env.NODE_ENV === 'production',
-          sameSite: 'strict'
+          sameSite: 'lax'
         })
-        
+
         dispatch({ type: 'SET_TOKEN', payload: token })
         dispatch({ type: 'SET_USER', payload: user })
-        
+
         toast.success(`Welcome back, ${user.name}!`)
         return true
       } else {
-        toast.error('Login failed. Please check your OTP.')
+        toast.error('Login failed. Please check your credentials.')
         return false
       }
     } catch (error: any) {
@@ -244,7 +222,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     login,
     loginWithTelegram,
     logout,
-    sendOTP,
     hasPermission,
     hasRole,
     refreshToken,

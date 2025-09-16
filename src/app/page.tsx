@@ -68,7 +68,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen">
-      <Header />
+      {/* <Header /> */}
       
       {/* Hero Section */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-brand-red via-brand-red-dark to-brand-black">

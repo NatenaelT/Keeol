@@ -100,11 +100,11 @@ const ResetPasswordPage = () => {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label htmlFor="password" class="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                   New Password
                 </label>
-                <div class="relative">
-                  <Lock class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
                     id="password"
                     type="password"
@@ -118,11 +118,11 @@ const ResetPasswordPage = () => {
               </div>
 
               <div>
-                <label htmlFor="confirm-password" class="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-2">
                   Confirm New Password
                 </label>
-                <div class="relative">
-                  <Lock class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
                     id="confirm-password"
                     type="password"

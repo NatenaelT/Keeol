@@ -53,7 +53,8 @@ export async function POST(request: NextRequest) {
       httpOnly: false, // Allow client-side access for auth state
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 // 7 days
+      maxAge: 7 * 24 * 60 * 60, // 7 days
+      path: '/' // Make cookie available site-wide
     })
 
     return NextResponse.json({

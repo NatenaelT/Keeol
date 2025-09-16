@@ -7,6 +7,8 @@ const routePermissions: Record<string, string[]> = {
   '/about': ['*'],
   '/contact': ['*'],
   '/menu': ['*'],
+  '/api/menu': ['*'],
+  '/api/categories': ['*'],
   '/login': ['*'],
   '/register': ['*'],
   '/auth': ['*'],

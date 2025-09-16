@@ -148,7 +148,7 @@ const Footer = () => {
                 <Mail className="w-5 h-5 text-brand-red mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-sm font-medium">Email Support</p>
-                  <p className="text-gray-400 text-sm">support@keolburger.com</p>
+                  <p className="text-gray-400 text-sm">support@keol.com</p>
                 </div>
               </div>
               <div className="flex items-start space-x-3">

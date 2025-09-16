@@ -23,8 +23,24 @@ class AuthService {
    * Login with phone and password
    */
   async loginWithPassword(phoneNumber: string, password: string): Promise<{ user: User; token: string } | null> {
+    return this.loginWithPasswordByContact(phoneNumber, password)
+  }
+
+  /**
+   * Login with email OR phone and password
+   */
+  async loginWithPasswordByContact(contact: string, password: string): Promise<{ user: User; token: string } | null> {
     try {
-      const user = await this.findUserByPhone(phoneNumber)
+      const isEmail = /@/.test(contact)
+      const normalized = isEmail ? contact.trim().toLowerCase() : (() => {
+        const digits = contact.replace(/\D/g, '')
+        if (digits.startsWith('251')) return '+' + digits
+        if (digits.startsWith('0')) return '+251' + digits.slice(1)
+        if (digits.length === 9) return '+251' + digits
+        return contact
+      })()
+
+      const user = isEmail ? await this.findUserByEmail(normalized) : await this.findUserByPhone(normalized)
       if (!user) {
         throw new Error('User not found')
       }

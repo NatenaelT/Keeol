@@ -4,151 +4,119 @@ import { useState, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { 
   Phone, 
+  Mail,
   User, 
   ArrowRight, 
   MessageCircle,
   ChefHat,
   Eye,
   EyeOff,
-  Lock
+  Shield
 } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'react-hot-toast'
-import type { AuthFormData } from '@/app/auth/page'
+
+export type AuthMode = 'signin' | 'signup'
 
 interface AuthToggleProps {
-  mode: 'signin' | 'signup'
-  onModeChange: (mode: 'signin' | 'signup') => void
-  onSubmit: (data: AuthFormData) => Promise<boolean>
+  mode: AuthMode
+  onModeChange: (mode: AuthMode) => void
+  onSendCode: (payload: { contact: string; mode: AuthMode; name?: string }) => Promise<boolean>
+  onVerifyCode: (payload: { contact: string; code: string; mode: AuthMode; name?: string }) => Promise<boolean>
   isLoading?: boolean
 }
 
 interface FormData {
-  phoneNumber: string
+  contact: string // email or phone
   name: string
-  password: string
+  code: string
 }
 
-const AuthToggle = ({ mode, onModeChange, onSubmit, isLoading = false }: AuthToggleProps) => {
-  const [formData, setFormData] = useState<FormData>({
-    phoneNumber: '',
-    name: '',
-    password: ''
-  })
-  const [showPassword, setShowPassword] = useState(false)
-  const [formErrors, setFormErrors] = useState<Partial<FormData>>({})
+const AuthToggle = ({ mode, onModeChange, onSendCode, onVerifyCode, isLoading = false }: AuthToggleProps) => {
+  const [formData, setFormData] = useState<FormData>({ contact: '', name: '', code: '' })
+  const [step, setStep] = useState<'enter' | 'verify'>('enter')
+  const [showCode, setShowCode] = useState(false)
 
-  const formatPhoneNumber = useCallback((value: string): string => {
-    // Remove all non-digits
+  const isEmail = (value: string) => /@/.test(value)
+
+  const formatPhone = useCallback((value: string) => {
     const digits = value.replace(/\D/g, '')
-    
-    // Ethiopian phone number formatting
     if (digits.startsWith('251')) {
-      if (digits.length >= 12) {
-        return '+251 ' + digits.slice(3, 5) + ' ' + digits.slice(5, 8) + ' ' + digits.slice(8, 12)
-      }
+      if (digits.length >= 12) return '+251 ' + digits.slice(3, 5) + ' ' + digits.slice(5, 8) + ' ' + digits.slice(8, 12)
       return '+251 ' + digits.slice(3)
-    } else if (digits.startsWith('09') || digits.startsWith('07')) {
-      if (digits.length >= 10) {
-        return '+251 ' + digits.slice(1, 3) + ' ' + digits.slice(3, 6) + ' ' + digits.slice(6, 10)
-      }
+    }
+    if (digits.startsWith('09') || digits.startsWith('07')) {
+      if (digits.length >= 10) return '+251 ' + digits.slice(1, 3) + ' ' + digits.slice(3, 6) + ' ' + digits.slice(6, 10)
       return '+251 ' + digits.slice(1)
-    } else if (digits.length > 0) {
-      if (digits.length >= 9) {
-        return '+251 ' + digits.slice(0, 2) + ' ' + digits.slice(2, 5) + ' ' + digits.slice(5, 9)
-      }
+    }
+    if (digits.length > 0) {
+      if (digits.length >= 9) return '+251 ' + digits.slice(0, 2) + ' ' + digits.slice(2, 5) + ' ' + digits.slice(5, 9)
       return '+251 ' + digits
     }
-    
     return value
   }, [])
 
-  const validatePhoneNumber = useCallback((phone: string): boolean => {
-    const cleanPhone = phone.replace(/\D/g, '')
-    
-    // Ethiopian phone number validation
-    if (cleanPhone.startsWith('251')) {
-      return cleanPhone.length === 12 && /^251[97]\d{8}$/.test(cleanPhone)
+  const handleInput = (field: keyof FormData, value: string) => {
+    if (field === 'contact' && !isEmail(value)) {
+      value = formatPhone(value)
     }
-    if (cleanPhone.startsWith('09') || cleanPhone.startsWith('07')) {
-      return cleanPhone.length === 10 && /^0[97]\d{8}$/.test(cleanPhone)
+    if (field === 'code') {
+      value = value.replace(/\D/g, '').slice(0, 6)
     }
-    
-    return false
-  }, [])
-
-  const validateForm = useCallback((): boolean => {
-    const errors: Partial<FormData> = {}
-
-    // Phone number validation
-    if (!formData.phoneNumber.trim()) {
-      errors.phoneNumber = 'Phone number is required'
-    } else if (!validatePhoneNumber(formData.phoneNumber)) {
-      errors.phoneNumber = 'Please enter a valid Ethiopian phone number'
-    }
-
-    // Name validation for signup
-    if (mode === 'signup') {
-      if (!formData.name.trim()) {
-        errors.name = 'Full name is required'
-      } else if (formData.name.trim().length < 2) {
-        errors.name = 'Name must be at least 2 characters long'
-      }
-    }
-
-    // Password validation
-    if (!formData.password.trim()) {
-      errors.password = 'Password is required'
-    } else if (formData.password.length < 6) {
-      errors.password = 'Password must be at least 6 characters long'
-    }
-
-    setFormErrors(errors)
-    return Object.keys(errors).length === 0
-  }, [formData, mode, validatePhoneNumber])
-
-  const handleInputChange = useCallback((field: keyof FormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
-    
-    // Clear specific field error when user starts typing
-    if (formErrors[field]) {
-      setFormErrors(prev => ({ ...prev, [field]: undefined }))
+  }
+
+  const validateContact = () => {
+    const value = formData.contact.trim()
+    if (!value) return 'Email or phone is required'
+    if (isEmail(value)) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(value)) return 'Please enter a valid email'
+      return null
     }
-  }, [formErrors])
+    const digits = value.replace(/\D/g, '')
+    if (!(digits.startsWith('251') || digits.startsWith('09') || digits.startsWith('07')) || digits.length < 10) {
+      return 'Please enter a valid Ethiopian phone number'
+    }
+    return null
+  }
 
-  const handlePhoneChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatPhoneNumber(e.target.value)
-    handleInputChange('phoneNumber', formatted)
-  }, [formatPhoneNumber, handleInputChange])
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSend = async (e: React.FormEvent) => {
     e.preventDefault()
-    
-    if (!validateForm()) {
-      const firstError = Object.values(formErrors)[0]
-      if (firstError) {
-        toast.error(firstError)
-      }
+    const contactError = validateContact()
+    if (contactError) {
+      toast.error(contactError)
+      return
+    }
+    if (mode === 'signup' && !formData.name.trim()) {
+      toast.error('Please enter your name')
       return
     }
 
-    const success = await onSubmit({
-      phoneNumber: formData.phoneNumber,
-      name: formData.name,
-      password: formData.password,
-      mode
-    })
-
-    if (success) {
-      setFormData({ phoneNumber: '', name: '', password: '' })
-      setFormErrors({})
+    const ok = await onSendCode({ contact: formData.contact, mode, name: formData.name })
+    if (ok) {
+      toast.success(`Verification code sent to your ${isEmail(formData.contact) ? 'email' : 'phone'}`)
+      setStep('verify')
     }
   }
 
-  const handleTelegramLogin = useCallback(() => {
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!formData.code || formData.code.length !== 6) {
+      toast.error('Enter the 6-digit code')
+      return
+    }
+
+    const ok = await onVerifyCode({ contact: formData.contact, code: formData.code, mode, name: formData.name })
+    if (ok) {
+      // redirect handled upstream
+    }
+  }
+
+  const handleTelegramLogin = () => {
     const botUsername = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'keolburgerbot'
     window.open(`https://t.me/${botUsername}?start=login`, '_blank', 'noopener,noreferrer')
-  }, [])
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-red to-brand-black flex items-center justify-center p-4">
@@ -206,105 +174,112 @@ const AuthToggle = ({ mode, onModeChange, onSubmit, isLoading = false }: AuthTog
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-            {mode === 'signup' && (
+          {step === 'enter' ? (
+            <form onSubmit={handleSend} className="space-y-6" noValidate>
+              {mode === 'signup' && (
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                    Full Name
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <input
+                      id="name"
+                      type="text"
+                      value={formData.name}
+                      onChange={(e) => handleInput('name', e.target.value)}
+                      placeholder="Enter your full name"
+                      className="input-field pl-11"
+                      required={mode === 'signup'}
+                      autoComplete="name"
+                    />
+                  </div>
+                </div>
+              )}
+
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                  Full Name
+                <label htmlFor="contact" className="block text-sm font-medium text-gray-700 mb-2">
+                  Email or Phone
                 </label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  {isEmail(formData.contact) ? (
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  ) : (
+                    <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  )}
                   <input
-                    id="name"
+                    id="contact"
                     type="text"
-                    value={formData.name}
-                    onChange={(e) => handleInputChange('name', e.target.value)}
-                    placeholder="Enter your full name"
-                    className={`input-field pl-11 ${formErrors.name ? 'border-red-500' : ''}`}
-                    required={mode === 'signup'}
-                    autoComplete="name"
+                    value={formData.contact}
+                    onChange={(e) => handleInput('contact', e.target.value)}
+                    placeholder="example@email.com or +251 91 123 4567"
+                    className="input-field pl-11"
+                    required
+                    autoComplete={isEmail(formData.contact) ? 'email' : 'tel'}
                   />
                 </div>
-                {formErrors.name && (
-                  <p className="mt-1 text-sm text-red-600">{formErrors.name}</p>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full btn-primary flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? (
+                  <div className="loading-spinner w-5 h-5"></div>
+                ) : (
+                  <>
+                    <span>Send Code</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
                 )}
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleVerify} className="space-y-6" noValidate>
+              <div>
+                <label htmlFor="code" className="block text-sm font-medium text-gray-700 mb-2">
+                  Enter 6-digit Code
+                </label>
+                <div className="relative">
+                  <Shield className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <input
+                    id="code"
+                    type={showCode ? 'text' : 'password'}
+                    value={formData.code}
+                    onChange={(e) => handleInput('code', e.target.value)}
+                    placeholder="123456"
+                    className="input-field pl-11 pr-11 text-center tracking-widest"
+                    maxLength={6}
+                    required
+                    inputMode="numeric"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCode(!showCode)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    aria-label={showCode ? 'Hide code' : 'Show code'}
+                  >
+                    {showCode ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  We sent a code to your {isEmail(formData.contact) ? 'email' : 'phone'}: {formData.contact}
+                </p>
               </div>
-            )}
 
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                Phone Number
-              </label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  id="phone"
-                  type="tel"
-                  value={formData.phoneNumber}
-                  onChange={handlePhoneChange}
-                  placeholder="+251 91 123 4567"
-                  className={`input-field pl-11 ${formErrors.phoneNumber ? 'border-red-500' : ''}`}
-                  required
-                  autoComplete="tel"
-                />
-              </div>
-              {formErrors.phoneNumber && (
-                <p className="mt-1 text-sm text-red-600">{formErrors.phoneNumber}</p>
-              )}
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={formData.password}
-                  onChange={(e) => handleInputChange('password', e.target.value)}
-                  placeholder="Enter your password"
-                  className={`input-field pl-11 pr-11 ${formErrors.password ? 'border-red-500' : ''}`}
-                  required
-                  autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
-                />
+              <div className="flex items-center justify-between">
+                <button type="button" onClick={() => setStep('enter')} className="btn-outline">Back</button>
                 <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  type="submit"
+                  disabled={isLoading || formData.code.length !== 6}
+                  className="btn-primary px-6 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {mode === 'signin' ? 'Verify & Sign In' : 'Verify & Create Account'}
                 </button>
               </div>
-              {formErrors.password && (
-                <p className="mt-1 text-sm text-red-600">{formErrors.password}</p>
-              )}
-              {mode === 'signin' && (
-                <div className="text-right mt-2">
-                  <Link href="/forgot-password" className="text-sm text-brand-red hover:text-brand-red-dark">
-                    Forgot password?
-                  </Link>
-                </div>
-              )}
-            </div>
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full btn-primary flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? (
-                <div className="loading-spinner w-5 h-5"></div>
-              ) : (
-                <>
-                  <span>{mode === 'signin' ? 'Sign In' : 'Create Account'}</span>
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
-            </button>
-          </form>
+            </form>
+          )}
 
           {/* Telegram Login */}
           <div className="mt-8 pt-6 border-t border-gray-200">
@@ -329,7 +304,7 @@ const AuthToggle = ({ mode, onModeChange, onSubmit, isLoading = false }: AuthTog
               {mode === 'signin' ? 'New to keol?' : 'Already have an account?'}{' '}
               <button
                 type="button"
-                onClick={() => onModeChange(mode === 'signin' ? 'signup' : 'signin')}
+                onClick={() => { setStep('enter'); onModeChange(mode === 'signin' ? 'signup' : 'signin') }}
                 className="text-brand-red hover:text-brand-red-dark font-medium focus:outline-none focus:underline"
               >
                 {mode === 'signin' ? 'Create account' : 'Sign in'}

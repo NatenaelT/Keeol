@@ -56,6 +56,7 @@ const AuthPage = () => {
         }),
       })
 
+      console.log('Response object:', response);
       const resultText = await response.text();
       const result = JSON.parse(resultText);
 

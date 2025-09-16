@@ -77,7 +77,7 @@ const Footer = () => {
                 <ChefHat className="w-8 h-8 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold">keol Burger</h2>
+                <h2 className="text-xl font-bold">keol</h2>
                 <p className="text-sm text-gray-400">& Pizza House</p>
               </div>
             </div>
@@ -222,7 +222,7 @@ const Footer = () => {
         <div className="container-responsive py-6">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-sm text-gray-400">
-              © {currentYear} keol Burger & Pizza House. All rights reserved.
+              © {currentYear} keol & Pizza House. All rights reserved.
             </div>
             <div className="flex items-center space-x-6">
               {footerLinks.legal.map((link) => (

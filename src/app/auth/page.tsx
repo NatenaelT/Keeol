@@ -56,7 +56,7 @@ const AuthPage = () => {
         }),
       })
 
-      const result = await response.clone().json()
+      const result = await response.json()
 
       if (response.ok && result.success) {
         toast.success(

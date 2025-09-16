@@ -23,7 +23,7 @@ export interface VerifyCodePayload {
 const AuthPage = () => {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const { isAuthenticated, isLoading: authLoading, sendOTP, verifyOTP } = useAuth()
+  const { isAuthenticated, isLoading: authLoading } = useAuth()
   
   const [mode, setMode] = useState<AuthMode>('signin')
   const [isLoading, setIsLoading] = useState(false)
@@ -51,6 +51,7 @@ const AuthPage = () => {
     window.history.replaceState({}, '', url.toString())
   }
 
+  // OTP handlers are now handled inside the component via fetch to avoid coupling
   const handleSendCode = async (payload: SendCodePayload): Promise<boolean> => {
     setIsLoading(true)
     try {

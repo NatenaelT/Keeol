@@ -184,7 +184,7 @@ const AdminDashboard = () => {
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
             <p className="text-gray-600 mt-2">
-              Welcome back, {user?.name}. Here's what's happening at Keeol Burger today.
+              Welcome back, {user?.name}. Here's what's happening at keol Burger today.
             </p>
           </div>
 

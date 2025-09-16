@@ -44,23 +44,26 @@ const AuthPage = () => {
     try {
       const endpoint = data.mode === 'signin' ? '/api/auth/login' : '/api/auth/register'
 
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      const result = await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', endpoint);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(JSON.parse(xhr.responseText));
+          } else {
+            reject(new Error(xhr.statusText));
+          }
+        };
+        xhr.onerror = () => reject(new Error('Network request failed'));
+        xhr.send(JSON.stringify({
           phoneNumber: data.phoneNumber,
           name: data.name,
           password: data.password
-        }),
-      })
+        }));
+      });
 
-      console.log('Response object:', response);
-      const resultText = await response.text();
-      const result = JSON.parse(resultText);
-
-      if (response.ok && result.success) {
+      if (result.success) {
         toast.success(
           data.mode === 'signin'
             ? `Welcome back, ${result.user.name}!`

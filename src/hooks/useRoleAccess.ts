@@ -113,6 +113,7 @@ export function useRoleAccess() {
     const baseItems = [
       { label: 'Home', href: '/', roles: ['*'] },
       { label: 'Menu', href: '/menu', roles: ['*'] },
+      { label: 'Profile', href: '/profile', roles: ['customer', 'waiter', 'chef', 'delivery', 'operation_manager', 'admin', 'owner'] },
     ]
 
     const customerItems = [

@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase'
 import { toast } from 'react-hot-toast'
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcryptjs'
 
 export interface User {
   id: string

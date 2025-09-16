@@ -4,8 +4,10 @@ import { cookies } from 'next/headers'
 
 export async function POST(request: NextRequest) {
   try {
-    const { phoneNumber, name, password } = await request.json()
+    const body = await request.json()
+    const { phoneNumber, name, password } = body
 
+    // Validate required fields
     if (!phoneNumber || !name || !password) {
       return NextResponse.json(
         { success: false, message: 'Phone number, name and password are required' },
@@ -13,9 +15,55 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Validate data types
+    if (typeof phoneNumber !== 'string' || typeof name !== 'string' || typeof password !== 'string') {
+      return NextResponse.json(
+        { success: false, message: 'Invalid data format' },
+        { status: 400 }
+      )
+    }
+
+    // Validate name
+    const trimmedName = name.trim()
+    if (trimmedName.length < 2) {
+      return NextResponse.json(
+        { success: false, message: 'Name must be at least 2 characters long' },
+        { status: 400 }
+      )
+    }
+
+    if (trimmedName.length > 100) {
+      return NextResponse.json(
+        { success: false, message: 'Name is too long' },
+        { status: 400 }
+      )
+    }
+
+    // Validate password
+    if (password.length < 6) {
+      return NextResponse.json(
+        { success: false, message: 'Password must be at least 6 characters long' },
+        { status: 400 }
+      )
+    }
+
+    if (password.length > 100) {
+      return NextResponse.json(
+        { success: false, message: 'Password is too long' },
+        { status: 400 }
+      )
+    }
+
     // Clean and validate phone number
     const cleanPhone = phoneNumber.replace(/\D/g, '')
-    if (cleanPhone.length < 9 || (!cleanPhone.startsWith('251') && !cleanPhone.startsWith('09') && !cleanPhone.startsWith('07'))) {
+    if (cleanPhone.length < 9) {
+      return NextResponse.json(
+        { success: false, message: 'Phone number is too short' },
+        { status: 400 }
+      )
+    }
+
+    if (!cleanPhone.startsWith('251') && !cleanPhone.startsWith('09') && !cleanPhone.startsWith('07')) {
       return NextResponse.json(
         { success: false, message: 'Please enter a valid Ethiopian phone number' },
         { status: 400 }
@@ -34,7 +82,7 @@ export async function POST(request: NextRequest) {
     // Create new user
     const user = await authService.createUser({
       phoneNumber,
-      name: name.trim(),
+      name: trimmedName,
       password,
       role: 'customer'
     })
@@ -71,8 +119,25 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Registration error:', error)
+    
+    // Handle specific error types
+    if (error instanceof Error) {
+      if (error.message.includes('duplicate') || error.message.includes('unique')) {
+        return NextResponse.json(
+          { success: false, message: 'An account with this information already exists' },
+          { status: 409 }
+        )
+      }
+      if (error.message.includes('database') || error.message.includes('connection')) {
+        return NextResponse.json(
+          { success: false, message: 'Database connection error. Please try again later.' },
+          { status: 503 }
+        )
+      }
+    }
+
     return NextResponse.json(
-      { success: false, message: 'Registration failed. Please try again.' },
+      { success: false, message: 'Registration failed. Please try again later.' },
       { status: 500 }
     )
   }

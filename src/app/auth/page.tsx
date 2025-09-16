@@ -6,6 +6,13 @@ import { useAuth } from '@/contexts/AuthContext'
 import { toast } from 'react-hot-toast'
 import AuthToggle from '@/components/auth/AuthToggle'
 
+export interface AuthFormData {
+  phoneNumber: string
+  name?: string
+  password: string
+  mode: 'signin' | 'signup'
+}
+
 const AuthPage = () => {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -24,11 +31,11 @@ const AuthPage = () => {
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !authLoading) {
       const redirectTo = searchParams.get('redirect') || '/profile'
-      window.location.href = redirectTo
+      router.push(redirectTo)
     }
-  }, [isAuthenticated, searchParams])
+  }, [isAuthenticated, authLoading, searchParams, router])
 
   const handleModeChange = (newMode: 'signin' | 'signup') => {
     setMode(newMode)
@@ -38,30 +45,32 @@ const AuthPage = () => {
     window.history.replaceState({}, '', url.toString())
   }
 
-  const handleSubmit = async (data: { phoneNumber: string; name?: string; password?: string; mode: 'signin' | 'signup' }) => {
+  const handleSubmit = async (data: AuthFormData): Promise<boolean> => {
     setIsLoading(true)
 
     try {
       const endpoint = data.mode === 'signin' ? '/api/auth/login' : '/api/auth/register'
+      
+      const requestBody = JSON.stringify({
+        phoneNumber: data.phoneNumber,
+        ...(data.mode === 'signup' && { name: data.name }),
+        password: data.password
+      })
 
-      const result = await new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', endpoint);
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            resolve(JSON.parse(xhr.responseText));
-          } else {
-            reject(new Error(xhr.statusText));
-          }
-        };
-        xhr.onerror = () => reject(new Error('Network request failed'));
-        xhr.send(JSON.stringify({
-          phoneNumber: data.phoneNumber,
-          name: data.name,
-          password: data.password
-        }));
-      });
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: requestBody,
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`)
+      }
+
+      const result = await response.json()
 
       if (result.success) {
         toast.success(
@@ -69,21 +78,22 @@ const AuthPage = () => {
             ? `Welcome back, ${result.user.name}!`
             : `Account created successfully! Welcome, ${result.user.name}!`
         )
+        
         const redirectTo = searchParams.get('redirect') || '/profile'
-
-        // Add a small delay to ensure cookie is set before navigation
+        
+        // Use router.push instead of window.location for better UX
         setTimeout(() => {
-          // Use window.location for more reliable navigation after auth
-          window.location.href = redirectTo
+          router.push(redirectTo)
         }, 100)
+        
         return true
       } else {
-        toast.error(result.message || `${data.mode === 'signin' ? 'Sign in' : 'Sign up'} failed`)
-        return false
+        throw new Error(result.message || `${data.mode === 'signin' ? 'Sign in' : 'Sign up'} failed`)
       }
     } catch (error) {
       console.error('Auth error:', error)
-      toast.error(`${data.mode === 'signin' ? 'Sign in' : 'Sign up'} failed. Please try again.`)
+      const errorMessage = error instanceof Error ? error.message : 'Authentication failed. Please try again.'
+      toast.error(errorMessage)
       return false
     } finally {
       setIsLoading(false)
@@ -96,6 +106,11 @@ const AuthPage = () => {
         <div className="loading-spinner"></div>
       </div>
     )
+  }
+
+  // Don't render auth form if already authenticated
+  if (isAuthenticated) {
+    return null
   }
 
   return (

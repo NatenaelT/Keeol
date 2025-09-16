@@ -23,6 +23,7 @@ interface AuthToggleProps {
   onModeChange: (mode: AuthMode) => void
   onSendCode: (payload: { contact: string; mode: AuthMode; name?: string }) => Promise<boolean>
   onVerifyCode: (payload: { contact: string; code: string; mode: AuthMode; name?: string }) => Promise<boolean>
+  onPasswordLogin?: (payload: { contact: string; password: string }) => Promise<boolean>
   isLoading?: boolean
 }
 
@@ -32,10 +33,13 @@ interface FormData {
   code: string
 }
 
-const AuthToggle = ({ mode, onModeChange, onSendCode, onVerifyCode, isLoading = false }: AuthToggleProps) => {
+const AuthToggle = ({ mode, onModeChange, onSendCode, onVerifyCode, onPasswordLogin, isLoading = false }: AuthToggleProps) => {
   const [formData, setFormData] = useState<FormData>({ contact: '', name: '', code: '' })
+  const [password, setPassword] = useState('')
+  const [adminPasswordMode, setAdminPasswordMode] = useState(false)
   const [step, setStep] = useState<'enter' | 'verify'>('enter')
   const [showCode, setShowCode] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const isEmail = (value: string) => /@/.test(value)
 
@@ -174,7 +178,73 @@ const AuthToggle = ({ mode, onModeChange, onSendCode, onVerifyCode, isLoading = 
             </button>
           </div>
 
-          {step === 'enter' ? (
+          {adminPasswordMode ? (
+            <form onSubmit={async (e) => {
+              e.preventDefault()
+              if (!formData.contact.trim() || !password.trim()) {
+                toast.error('Contact and password are required')
+                return
+              }
+              if (!onPasswordLogin) {
+                toast.error('Password login unavailable')
+                return
+              }
+              const ok = await onPasswordLogin({ contact: formData.contact, password })
+              if (ok) return
+            }} className="space-y-6" noValidate>
+              <div>
+                <label htmlFor="contact" className="block text-sm font-medium text-gray-700 mb-2">
+                  Email or Phone
+                </label>
+                <div className="relative">
+                  {isEmail(formData.contact) ? (
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  ) : (
+                    <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  )}
+                  <input
+                    id="contact"
+                    type="text"
+                    value={formData.contact}
+                    onChange={(e) => handleInput('contact', e.target.value)}
+                    placeholder="admin@example.com or +251 91 123 4567"
+                    className="input-field pl-11"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    className="input-field pr-11"
+                    required
+                    autoComplete="current-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <button type="button" onClick={() => setAdminPasswordMode(false)} className="btn-outline">Use Code Instead</button>
+                <button type="submit" className="btn-primary px-6 py-2">Sign In</button>
+              </div>
+            </form>
+          ) : step === 'enter' ? (
             <form onSubmit={handleSend} className="space-y-6" noValidate>
               {mode === 'signup' && (
                 <div>
@@ -296,6 +366,16 @@ const AuthToggle = ({ mode, onModeChange, onSendCode, onVerifyCode, isLoading = 
                 <span className="text-gray-700">Continue with Telegram</span>
               </button>
             </div>
+          </div>
+
+          <div className="mt-4 text-center">
+            <button
+              type="button"
+              onClick={() => setAdminPasswordMode(!adminPasswordMode)}
+              className="text-xs text-gray-500 hover:text-gray-700"
+            >
+              {adminPasswordMode ? 'Use code login' : 'Admin? Sign in with password'}
+            </button>
           </div>
 
           {/* Additional Info */}

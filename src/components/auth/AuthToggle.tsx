@@ -82,7 +82,7 @@ const AuthToggle = ({ mode, onModeChange, onSubmit, isLoading = false }: AuthTog
 
   const handleTelegramLogin = () => {
     window.open(
-      `https://t.me/${process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'keeolburgerbot'}?start=login`,
+      `https://t.me/${process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'keolburgerbot'}?start=login`,
       '_blank'
     )
   }
@@ -101,7 +101,7 @@ const AuthToggle = ({ mode, onModeChange, onSubmit, isLoading = false }: AuthTog
             <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
               <ChefHat className="w-8 h-8 text-brand-red" />
             </div>
-            <h1 className="text-2xl font-bold text-white">Keeol Burger</h1>
+            <h1 className="text-2xl font-bold text-white">keol Burger</h1>
             <p className="text-brand-yellow">& Pizza House</p>
           </Link>
         </div>
@@ -113,7 +113,7 @@ const AuthToggle = ({ mode, onModeChange, onSubmit, isLoading = false }: AuthTog
               {mode === 'signin' ? 'Welcome Back' : 'Create Account'}
             </h2>
             <p className="text-gray-600 mt-2">
-              {mode === 'signin' ? 'Sign in to your account' : 'Join the Keeol Burger family'}
+              {mode === 'signin' ? 'Sign in to your account' : 'Join the keol Burger family'}
             </p>
           </div>
 
@@ -221,7 +221,7 @@ const AuthToggle = ({ mode, onModeChange, onSubmit, isLoading = false }: AuthTog
           {/* Additional Info */}
           <div className="mt-6 text-center text-sm text-gray-600">
             <p>
-              {mode === 'signin' ? 'New to Keeol Burger?' : 'Already have an account?'}{' '}
+              {mode === 'signin' ? 'New to keol Burger?' : 'Already have an account?'}{' '}
               <button
                 onClick={() => onModeChange(mode === 'signin' ? 'signup' : 'signin')}
                 className="text-brand-red hover:text-brand-red-dark font-medium"

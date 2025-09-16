@@ -117,7 +117,7 @@ const AboutPage = () => {
               transition={{ duration: 0.8 }}
               className="text-center max-w-4xl mx-auto"
             >
-              <h1 className="text-5xl md:text-6xl font-bold mb-6">About Keeol Burger</h1>
+              <h1 className="text-5xl md:text-6xl font-bold mb-6">About keol Burger</h1>
               <p className="text-xl md:text-2xl opacity-90 mb-8">
                 Serving delicious burgers and pizzas with authentic Ethiopian hospitality since 2019
               </p>
@@ -163,7 +163,7 @@ const AboutPage = () => {
                 <h2 className="text-4xl font-bold text-gray-900 mb-6">Our Story</h2>
                 <div className="space-y-4 text-gray-600 leading-relaxed">
                   <p>
-                    Keeol Burger & Pizza House was born from a simple dream: to bring people together 
+                    keol Burger & Pizza House was born from a simple dream: to bring people together 
                     over great food. Founded in 2019 by a group of food enthusiasts, we started as a 
                     small burger restaurant in the heart of Bole, Addis Ababa.
                   </p>
@@ -333,7 +333,7 @@ const AboutPage = () => {
                 </div>
                 <div className="flex items-center gap-2 text-lg">
                   <Mail className="w-5 h-5" />
-                  info@keeolburger.com
+                  info@keolburger.com
                 </div>
               </div>
             </motion.div>

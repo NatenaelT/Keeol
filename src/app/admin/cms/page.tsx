@@ -53,21 +53,21 @@ const CMSPage = () => {
     const mockContent: ContentItem[] = [
       {
         id: '1',
-        title: 'Welcome to Keeol Burger',
-        slug: 'welcome-to-keeol-burger',
-        content: `<h1>Welcome to Keeol Burger & Pizza House</h1>
+        title: 'Welcome to keol Burger',
+        slug: 'welcome-to-keol-burger',
+        content: `<h1>Welcome to keol Burger & Pizza House</h1>
 <p>We are delighted to serve you the finest burgers and pizzas in Addis Ababa. Our commitment to quality ingredients and exceptional service has made us a favorite among food lovers.</p>
 <h2>Our Story</h2>
-<p>Founded in 2019, Keeol Burger started as a small family business with a big dream - to bring people together over great food.</p>`,
-        excerpt: 'Welcome to Keeol Burger & Pizza House, where quality meets taste.',
+<p>Founded in 2019, keol Burger started as a small family business with a big dream - to bring people together over great food.</p>`,
+        excerpt: 'Welcome to keol Burger & Pizza House, where quality meets taste.',
         type: 'page',
         status: 'published',
         author: 'Admin',
         createdAt: '2024-01-01T00:00:00Z',
         updatedAt: '2024-01-15T12:00:00Z',
         publishedAt: '2024-01-01T00:00:00Z',
-        seoTitle: 'Welcome to Keeol Burger - Best Burgers in Addis Ababa',
-        seoDescription: 'Discover the finest burgers and pizzas in Addis Ababa at Keeol Burger & Pizza House.',
+        seoTitle: 'Welcome to keol Burger - Best Burgers in Addis Ababa',
+        seoDescription: 'Discover the finest burgers and pizzas in Addis Ababa at keol Burger & Pizza House.',
         tags: ['welcome', 'about', 'story']
       },
       {
@@ -85,8 +85,8 @@ const CMSPage = () => {
         createdAt: '2024-01-16T10:00:00Z',
         updatedAt: '2024-01-16T10:00:00Z',
         publishedAt: '2024-01-16T10:00:00Z',
-        seoTitle: '20% Off Pizza Weekend Special - Keeol Burger',
-        seoDescription: 'Limited time offer: 20% off all pizzas this weekend at Keeol Burger.',
+        seoTitle: '20% Off Pizza Weekend Special - keol Burger',
+        seoDescription: 'Limited time offer: 20% off all pizzas this weekend at keol Burger.',
         tags: ['promotion', 'pizza', 'discount', 'weekend']
       },
       {
@@ -108,7 +108,7 @@ const CMSPage = () => {
         createdAt: '2024-01-17T08:00:00Z',
         updatedAt: '2024-01-17T08:30:00Z',
         seoTitle: 'New Ethiopian Fusion Menu - Traditional Meets Modern',
-        seoDescription: 'Try our new Ethiopian fusion menu items at Keeol Burger.',
+        seoDescription: 'Try our new Ethiopian fusion menu items at keol Burger.',
         tags: ['menu', 'ethiopian', 'fusion', 'new']
       }
     ]

@@ -77,7 +77,7 @@ const Footer = () => {
                 <ChefHat className="w-8 h-8 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold">Keeol Burger</h2>
+                <h2 className="text-xl font-bold">keol Burger</h2>
                 <p className="text-sm text-gray-400">& Pizza House</p>
               </div>
             </div>
@@ -148,7 +148,7 @@ const Footer = () => {
                 <Mail className="w-5 h-5 text-brand-red mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="text-sm font-medium">Email Support</p>
-                  <p className="text-gray-400 text-sm">support@keeolburger.com</p>
+                  <p className="text-gray-400 text-sm">support@keolburger.com</p>
                 </div>
               </div>
               <div className="flex items-start space-x-3">
@@ -222,7 +222,7 @@ const Footer = () => {
         <div className="container-responsive py-6">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-sm text-gray-400">
-              © {currentYear} Keeol Burger & Pizza House. All rights reserved.
+              © {currentYear} keol Burger & Pizza House. All rights reserved.
             </div>
             <div className="flex items-center space-x-6">
               {footerLinks.legal.map((link) => (

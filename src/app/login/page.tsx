@@ -44,7 +44,7 @@ const LoginPage = () => {
     const script = document.createElement('script')
     script.src = 'https://telegram.org/js/telegram-widget.js?22'
     script.async = true
-    script.setAttribute('data-telegram-login', process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'keeolburgerbot')
+    script.setAttribute('data-telegram-login', process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'keolburgerbot')
     script.setAttribute('data-size', 'large')
     script.setAttribute('data-auth-url', `${window.location.origin}/api/auth/telegram-login`)
     script.setAttribute('data-request-access', 'write')
@@ -196,7 +196,7 @@ const LoginPage = () => {
             <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
               <ChefHat className="w-8 h-8 text-brand-red" />
             </div>
-            <h1 className="text-2xl font-bold text-white">Keeol Burger</h1>
+            <h1 className="text-2xl font-bold text-white">keol Burger</h1>
             <p className="text-brand-yellow">& Pizza House</p>
           </Link>
         </div>
@@ -255,7 +255,7 @@ const LoginPage = () => {
                 <div id="telegram-login-container" className="w-full">
                   {/* Telegram widget will be inserted here */}
                   <div
-                    id="telegram-login-keeolburgerbot"
+                    id="telegram-login-keolburgerbot"
                     className="telegram-login-widget w-full"
                   ></div>
 
@@ -263,7 +263,7 @@ const LoginPage = () => {
                   <button
                     onClick={() => {
                       window.open(
-                        `https://t.me/${process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'keeolburgerbot'}?start=login`,
+                        `https://t.me/${process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'keolburgerbot'}?start=login`,
                         '_blank'
                       )
                     }}
@@ -280,7 +280,7 @@ const LoginPage = () => {
           {/* Sign Up / Sign In Toggle */}
           <div className="mt-6 text-center text-sm text-gray-600">
             <p>
-              New to Keeol Burger?{' '}
+              New to keol Burger?{' '}
               <Link href="/register" className="text-brand-red hover:text-brand-red-dark font-medium">
                 Sign Up
               </Link>

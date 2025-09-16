@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { 
   Phone, 
@@ -14,65 +14,121 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'react-hot-toast'
+import type { AuthFormData } from '@/app/auth/page'
 
 interface AuthToggleProps {
   mode: 'signin' | 'signup'
   onModeChange: (mode: 'signin' | 'signup') => void
-  onSubmit: (data: { phoneNumber: string; name?: string; password?: string; mode: 'signin' | 'signup' }) => Promise<boolean>
+  onSubmit: (data: AuthFormData) => Promise<boolean>
   isLoading?: boolean
 }
 
+interface FormData {
+  phoneNumber: string
+  name: string
+  password: string
+}
+
 const AuthToggle = ({ mode, onModeChange, onSubmit, isLoading = false }: AuthToggleProps) => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     phoneNumber: '',
     name: '',
     password: ''
   })
   const [showPassword, setShowPassword] = useState(false)
+  const [formErrors, setFormErrors] = useState<Partial<FormData>>({})
 
-  const formatPhoneNumber = (value: string) => {
+  const formatPhoneNumber = useCallback((value: string): string => {
     // Remove all non-digits
     const digits = value.replace(/\D/g, '')
     
-    // Format Ethiopian phone number
+    // Ethiopian phone number formatting
     if (digits.startsWith('251')) {
-      return '+251 ' + digits.slice(3, 5) + ' ' + digits.slice(5, 8) + ' ' + digits.slice(8, 12)
+      if (digits.length >= 12) {
+        return '+251 ' + digits.slice(3, 5) + ' ' + digits.slice(5, 8) + ' ' + digits.slice(8, 12)
+      }
+      return '+251 ' + digits.slice(3)
     } else if (digits.startsWith('09') || digits.startsWith('07')) {
-      return '+251 ' + digits.slice(1, 3) + ' ' + digits.slice(3, 6) + ' ' + digits.slice(6, 10)
-    } else if (digits.length <= 10) {
-      return '+251 ' + digits.slice(0, 2) + ' ' + digits.slice(2, 5) + ' ' + digits.slice(5, 9)
+      if (digits.length >= 10) {
+        return '+251 ' + digits.slice(1, 3) + ' ' + digits.slice(3, 6) + ' ' + digits.slice(6, 10)
+      }
+      return '+251 ' + digits.slice(1)
+    } else if (digits.length > 0) {
+      if (digits.length >= 9) {
+        return '+251 ' + digits.slice(0, 2) + ' ' + digits.slice(2, 5) + ' ' + digits.slice(5, 9)
+      }
+      return '+251 ' + digits
     }
     
     return value
-  }
+  }, [])
 
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const validatePhoneNumber = useCallback((phone: string): boolean => {
+    const cleanPhone = phone.replace(/\D/g, '')
+    
+    // Ethiopian phone number validation
+    if (cleanPhone.startsWith('251')) {
+      return cleanPhone.length === 12 && /^251[97]\d{8}$/.test(cleanPhone)
+    }
+    if (cleanPhone.startsWith('09') || cleanPhone.startsWith('07')) {
+      return cleanPhone.length === 10 && /^0[97]\d{8}$/.test(cleanPhone)
+    }
+    
+    return false
+  }, [])
+
+  const validateForm = useCallback((): boolean => {
+    const errors: Partial<FormData> = {}
+
+    // Phone number validation
+    if (!formData.phoneNumber.trim()) {
+      errors.phoneNumber = 'Phone number is required'
+    } else if (!validatePhoneNumber(formData.phoneNumber)) {
+      errors.phoneNumber = 'Please enter a valid Ethiopian phone number'
+    }
+
+    // Name validation for signup
+    if (mode === 'signup') {
+      if (!formData.name.trim()) {
+        errors.name = 'Full name is required'
+      } else if (formData.name.trim().length < 2) {
+        errors.name = 'Name must be at least 2 characters long'
+      }
+    }
+
+    // Password validation
+    if (!formData.password.trim()) {
+      errors.password = 'Password is required'
+    } else if (formData.password.length < 6) {
+      errors.password = 'Password must be at least 6 characters long'
+    }
+
+    setFormErrors(errors)
+    return Object.keys(errors).length === 0
+  }, [formData, mode, validatePhoneNumber])
+
+  const handleInputChange = useCallback((field: keyof FormData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+    
+    // Clear specific field error when user starts typing
+    if (formErrors[field]) {
+      setFormErrors(prev => ({ ...prev, [field]: undefined }))
+    }
+  }, [formErrors])
+
+  const handlePhoneChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatPhoneNumber(e.target.value)
-    setFormData(prev => ({ ...prev, phoneNumber: formatted }))
-  }
+    handleInputChange('phoneNumber', formatted)
+  }, [formatPhoneNumber, handleInputChange])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!formData.phoneNumber.trim()) {
-      toast.error('Please enter your phone number')
-      return
-    }
-
-    if (mode === 'signup' && !formData.name.trim()) {
-      toast.error('Please enter your name')
-      return
-    }
-
-    if (!formData.password.trim()) {
-      toast.error('Please enter your password')
-      return
-    }
-
-    // Basic Ethiopian phone number validation
-    const cleanPhone = formData.phoneNumber.replace(/\D/g, '')
-    if (cleanPhone.length < 9 || (!cleanPhone.startsWith('251') && !cleanPhone.startsWith('09') && !cleanPhone.startsWith('07'))) {
-      toast.error('Please enter a valid Ethiopian phone number')
+    if (!validateForm()) {
+      const firstError = Object.values(formErrors)[0]
+      if (firstError) {
+        toast.error(firstError)
+      }
       return
     }
 
@@ -85,15 +141,14 @@ const AuthToggle = ({ mode, onModeChange, onSubmit, isLoading = false }: AuthTog
 
     if (success) {
       setFormData({ phoneNumber: '', name: '', password: '' })
+      setFormErrors({})
     }
   }
 
-  const handleTelegramLogin = () => {
-    window.open(
-      `https://t.me/${process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'keolburgerbot'}?start=login`,
-      '_blank'
-    )
-  }
+  const handleTelegramLogin = useCallback(() => {
+    const botUsername = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'keolburgerbot'
+    window.open(`https://t.me/${botUsername}?start=login`, '_blank', 'noopener,noreferrer')
+  }, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-red to-brand-black flex items-center justify-center p-4">
@@ -128,6 +183,7 @@ const AuthToggle = ({ mode, onModeChange, onSubmit, isLoading = false }: AuthTog
           {/* Mode Toggle */}
           <div className="flex bg-gray-100 rounded-lg p-1 mb-6">
             <button
+              type="button"
               onClick={() => onModeChange('signin')}
               className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
                 mode === 'signin'
@@ -138,6 +194,7 @@ const AuthToggle = ({ mode, onModeChange, onSubmit, isLoading = false }: AuthTog
               Sign In
             </button>
             <button
+              type="button"
               onClick={() => onModeChange('signup')}
               className={`flex-1 py-2 px-4 text-sm font-medium rounded-md transition-colors ${
                 mode === 'signup'
@@ -149,7 +206,7 @@ const AuthToggle = ({ mode, onModeChange, onSubmit, isLoading = false }: AuthTog
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             {mode === 'signup' && (
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
@@ -161,12 +218,16 @@ const AuthToggle = ({ mode, onModeChange, onSubmit, isLoading = false }: AuthTog
                     id="name"
                     type="text"
                     value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
                     placeholder="Enter your full name"
-                    className="input-field pl-11"
+                    className={`input-field pl-11 ${formErrors.name ? 'border-red-500' : ''}`}
                     required={mode === 'signup'}
+                    autoComplete="name"
                   />
                 </div>
+                {formErrors.name && (
+                  <p className="mt-1 text-sm text-red-600">{formErrors.name}</p>
+                )}
               </div>
             )}
 
@@ -182,10 +243,14 @@ const AuthToggle = ({ mode, onModeChange, onSubmit, isLoading = false }: AuthTog
                   value={formData.phoneNumber}
                   onChange={handlePhoneChange}
                   placeholder="+251 91 123 4567"
-                  className="input-field pl-11"
+                  className={`input-field pl-11 ${formErrors.phoneNumber ? 'border-red-500' : ''}`}
                   required
+                  autoComplete="tel"
                 />
               </div>
+              {formErrors.phoneNumber && (
+                <p className="mt-1 text-sm text-red-600">{formErrors.phoneNumber}</p>
+              )}
             </div>
 
             <div>
@@ -198,19 +263,24 @@ const AuthToggle = ({ mode, onModeChange, onSubmit, isLoading = false }: AuthTog
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   value={formData.password}
-                  onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                  onChange={(e) => handleInputChange('password', e.target.value)}
                   placeholder="Enter your password"
-                  className="input-field pl-11"
+                  className={`input-field pl-11 pr-11 ${formErrors.password ? 'border-red-500' : ''}`}
                   required
+                  autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
+              {formErrors.password && (
+                <p className="mt-1 text-sm text-red-600">{formErrors.password}</p>
+              )}
               {mode === 'signin' && (
                 <div className="text-right mt-2">
                   <Link href="/forgot-password" className="text-sm text-brand-red hover:text-brand-red-dark">
@@ -223,7 +293,7 @@ const AuthToggle = ({ mode, onModeChange, onSubmit, isLoading = false }: AuthTog
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full btn-primary flex items-center justify-center space-x-2"
+              className="w-full btn-primary flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <div className="loading-spinner w-5 h-5"></div>
@@ -242,9 +312,10 @@ const AuthToggle = ({ mode, onModeChange, onSubmit, isLoading = false }: AuthTog
               <p className="text-sm text-gray-600 mb-4">Or continue with</p>
               
               <button
+                type="button"
                 onClick={handleTelegramLogin}
                 disabled={isLoading}
-                className="flex items-center justify-center space-x-2 w-full py-3 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200 disabled:opacity-50"
+                className="flex items-center justify-center space-x-2 w-full py-3 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <MessageCircle className="w-5 h-5 text-blue-500" />
                 <span className="text-gray-700">Continue with Telegram</span>
@@ -257,8 +328,9 @@ const AuthToggle = ({ mode, onModeChange, onSubmit, isLoading = false }: AuthTog
             <p>
               {mode === 'signin' ? 'New to keol?' : 'Already have an account?'}{' '}
               <button
+                type="button"
                 onClick={() => onModeChange(mode === 'signin' ? 'signup' : 'signin')}
-                className="text-brand-red hover:text-brand-red-dark font-medium"
+                className="text-brand-red hover:text-brand-red-dark font-medium focus:outline-none focus:underline"
               >
                 {mode === 'signin' ? 'Create account' : 'Sign in'}
               </button>

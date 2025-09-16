@@ -109,7 +109,7 @@ const AboutPage = () => {
       
       <div className="pt-20">
         {/* Hero Section */}
-        <section className="relative bg-gradient-to-br from-brand-red to-brand-brown text-white py-20">
+        <section className="relative bg-gradient-to-br from-brand-red to-brand-black text-white py-20">
           <div className="container-responsive">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -187,10 +187,10 @@ const AboutPage = () => {
                 transition={{ duration: 0.8 }}
                 className="relative"
               >
-                <div className="aspect-square bg-gradient-to-br from-brand-yellow to-brand-red rounded-2xl flex items-center justify-center text-white text-2xl font-bold">
+                <div className="aspect-square bg-gradient-to-br from-brand-secondary to-brand-red rounded-2xl flex items-center justify-center text-white text-2xl font-bold">
                   Restaurant Interior
                 </div>
-                <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-brand-brown rounded-2xl flex items-center justify-center text-white font-bold">
+                <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-brand-black rounded-2xl flex items-center justify-center text-white font-bold">
                   Since 2019
                 </div>
               </motion.div>
@@ -257,7 +257,7 @@ const AboutPage = () => {
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                   className="card text-center hover:shadow-xl transition-shadow duration-300"
                 >
-                  <div className="w-32 h-32 bg-gradient-to-br from-brand-red to-brand-brown rounded-full mx-auto mb-6 flex items-center justify-center text-white text-lg font-bold">
+                  <div className="w-32 h-32 bg-gradient-to-br from-brand-red to-brand-black rounded-full mx-auto mb-6 flex items-center justify-center text-white text-lg font-bold">
                     {member.name.split(' ').map(n => n[0]).join('')}
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">{member.name}</h3>

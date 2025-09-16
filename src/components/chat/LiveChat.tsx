@@ -286,7 +286,7 @@ const LiveChat = () => {
         {!isUser && (
           <div className="flex-shrink-0 mr-3">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-              isBot ? 'bg-brand-yellow' : 'bg-brand-red'
+              isBot ? 'bg-brand-secondary' : 'bg-brand-red'
             }`}>
               {isBot ? (
                 <Bot className="w-4 h-4 text-white" />

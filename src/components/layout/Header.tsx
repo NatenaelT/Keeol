@@ -139,7 +139,7 @@ const Header = () => {
                     ? 'text-brand-red'
                     : scrolled
                       ? 'text-gray-900 hover:text-brand-red'
-                      : 'text-white hover:text-brand-yellow'
+                      : 'text-white hover:text-brand-secondary'
                 }`}
               >
                 {item.label}
@@ -333,7 +333,7 @@ const Header = () => {
                   className={`text-sm font-medium transition-colors duration-200 ${
                     scrolled
                       ? 'text-gray-900 hover:text-brand-red'
-                      : 'text-white hover:text-brand-yellow'
+                      : 'text-white hover:text-brand-secondary'
                   }`}
                 >
                   Sign In
@@ -343,7 +343,7 @@ const Header = () => {
                   className={`text-sm font-medium transition-colors duration-200 ml-4 ${
                     scrolled
                       ? 'text-gray-900 hover:text-brand-red'
-                      : 'text-white hover:text-brand-yellow'
+                      : 'text-white hover:text-brand-secondary'
                   }`}
                 >
                   Sign Up

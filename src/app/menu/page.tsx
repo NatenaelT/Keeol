@@ -253,7 +253,7 @@ const MenuPage = () => {
       
       <div className="pt-20">
         {/* Hero Section */}
-        <section className="bg-gradient-to-r from-brand-red to-brand-brown text-white py-16">
+        <section className="bg-gradient-to-r from-brand-red to-brand-black text-white py-16">
           <div className="container-responsive text-center">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -411,7 +411,7 @@ const MenuPage = () => {
                 >
                   {/* Item Image */}
                   <div className="relative h-48 rounded-lg overflow-hidden mb-4">
-                    <div className="w-full h-full bg-gradient-to-br from-brand-yellow to-brand-red flex items-center justify-center text-white text-xl font-bold">
+                    <div className="w-full h-full bg-gradient-to-br from-brand-secondary to-brand-red flex items-center justify-center text-white text-xl font-bold">
                       {item.name}
                     </div>
                     
@@ -580,7 +580,7 @@ const MenuPage = () => {
                 </div>
 
                 {/* Image */}
-                <div className="w-full h-48 bg-gradient-to-br from-brand-yellow to-brand-red rounded-lg flex items-center justify-center text-white text-xl font-bold mb-4">
+                <div className="w-full h-48 bg-gradient-to-br from-brand-secondary to-brand-red rounded-lg flex items-center justify-center text-white text-xl font-bold mb-4">
                   {selectedItem.name}
                 </div>
 

@@ -71,7 +71,7 @@ export default function HomePage() {
       <Header />
       
       {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-brand-red via-brand-red-dark to-brand-brown">
+      <section className="relative h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-brand-red via-brand-red-dark to-brand-black">
         <div className="absolute inset-0 bg-black/20" />
         <div className="container-responsive relative z-10 text-center text-white">
           <motion.div
@@ -157,7 +157,7 @@ export default function HomePage() {
                 className="card hover:shadow-xl transition-shadow duration-300"
               >
                 <div className="relative h-48 mb-4 rounded-lg overflow-hidden">
-                  <div className="w-full h-full bg-gradient-to-br from-brand-yellow to-brand-red flex items-center justify-center text-white text-2xl font-bold">
+                  <div className="w-full h-full bg-gradient-to-br from-brand-secondary to-brand-red flex items-center justify-center text-white text-2xl font-bold">
                     {item.name}
                   </div>
                 </div>

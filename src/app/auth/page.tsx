@@ -86,7 +86,7 @@ const AuthPage = () => {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-red to-brand-brown">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-red to-brand-black">
         <div className="loading-spinner"></div>
       </div>
     )

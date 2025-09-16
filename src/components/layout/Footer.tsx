@@ -171,7 +171,7 @@ const Footer = () => {
                 key={index}
                 className="bg-gray-800 rounded-lg p-6 text-center hover:bg-gray-700 transition-colors duration-200"
               >
-                <h4 className="text-lg font-semibold mb-3 text-brand-yellow">
+                <h4 className="text-lg font-semibold mb-3 text-brand-secondary">
                   {location.name}
                 </h4>
                 <div className="space-y-2 text-sm text-gray-400">

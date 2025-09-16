@@ -88,7 +88,7 @@ const AuthToggle = ({ mode, onModeChange, onSubmit, isLoading = false }: AuthTog
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-brand-red to-brand-brown flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-brand-red to-brand-black flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -102,7 +102,7 @@ const AuthToggle = ({ mode, onModeChange, onSubmit, isLoading = false }: AuthTog
               <ChefHat className="w-8 h-8 text-brand-red" />
             </div>
             <h1 className="text-2xl font-bold text-white">keol Burger</h1>
-            <p className="text-brand-yellow">& Pizza House</p>
+            <p className="text-brand-secondary">& Pizza House</p>
           </Link>
         </div>
 
@@ -236,7 +236,7 @@ const AuthToggle = ({ mode, onModeChange, onSubmit, isLoading = false }: AuthTog
         <div className="text-center mt-6">
           <Link 
             href="/" 
-            className="text-white hover:text-brand-yellow transition-colors duration-200 text-sm"
+            className="text-white hover:text-brand-secondary transition-colors duration-200 text-sm"
           >
             ← Back to Home
           </Link>

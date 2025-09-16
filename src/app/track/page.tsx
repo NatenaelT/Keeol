@@ -244,7 +244,7 @@ const TrackOrderPage = () => {
       
       <div className="pt-20">
         {/* Hero Section */}
-        <section className="bg-gradient-to-br from-brand-red to-brand-brown text-white py-16">
+        <section className="bg-gradient-to-br from-brand-red to-brand-black text-white py-16">
           <div className="container-responsive text-center">
             <motion.div
               initial={{ opacity: 0, y: 30 }}

@@ -77,7 +77,7 @@ const OptimizedImage = ({
     // Gradient background
     const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height)
     gradient.addColorStop(0, '#DC2626') // brand-red
-    gradient.addColorStop(1, '#FBBF24') // brand-yellow
+    gradient.addColorStop(1, '#FBBF24') // brand-secondary
     
     ctx.fillStyle = gradient
     ctx.fillRect(0, 0, canvas.width, canvas.height)
@@ -131,7 +131,7 @@ const OptimizedImage = ({
       {/* Placeholder/Low quality image */}
       {!isLoaded && !hasError && (
         <div 
-          className="absolute inset-0 bg-gradient-to-br from-brand-red to-brand-yellow flex items-center justify-center"
+          className="absolute inset-0 bg-gradient-to-br from-brand-red to-brand-secondary flex items-center justify-center"
           style={{ 
             backgroundImage: placeholder ? `url(${placeholder})` : undefined,
             backgroundSize: 'cover',

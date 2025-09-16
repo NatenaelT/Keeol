@@ -464,7 +464,7 @@ const CheckoutPage = () => {
                   <div className="space-y-4 mb-6">
                     {cartItems.map((item) => (
                       <div key={item.id} className="flex items-start gap-3">
-                        <div className="w-12 h-12 bg-gradient-to-br from-brand-yellow to-brand-red rounded-lg flex items-center justify-center text-white text-xs font-bold">
+                        <div className="w-12 h-12 bg-gradient-to-br from-brand-secondary to-brand-red rounded-lg flex items-center justify-center text-white text-xs font-bold">
                           {item.quantity}
                         </div>
                         <div className="flex-1">

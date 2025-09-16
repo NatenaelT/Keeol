@@ -157,7 +157,7 @@ const ContactPage = () => {
       
       <div className="pt-20">
         {/* Hero Section */}
-        <section className="bg-gradient-to-br from-brand-red to-brand-brown text-white py-16">
+        <section className="bg-gradient-to-br from-brand-red to-brand-black text-white py-16">
           <div className="container-responsive text-center">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -430,7 +430,7 @@ const ContactPage = () => {
                   <Phone className="w-5 h-5" />
                   Call Now: +251-911-123456
                 </a>
-                <span className="text-brand-yellow">or</span>
+                <span className="text-brand-secondary">or</span>
                 <button className="btn-outline border-white text-white hover:bg-white hover:text-brand-red flex items-center gap-2">
                   <MessageCircle className="w-5 h-5" />
                   Start Live Chat

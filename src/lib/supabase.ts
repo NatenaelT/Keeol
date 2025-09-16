@@ -41,6 +41,7 @@ export interface Database {
           updated_at: string
           last_login: string | null
           permissions: string[]
+          password: string | null
         }
         Insert: {
           id?: string

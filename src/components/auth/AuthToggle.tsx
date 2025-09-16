@@ -9,7 +9,8 @@ import {
   MessageCircle,
   ChefHat,
   Eye,
-  EyeOff
+  EyeOff,
+  Lock
 } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'react-hot-toast'
@@ -17,16 +18,17 @@ import { toast } from 'react-hot-toast'
 interface AuthToggleProps {
   mode: 'signin' | 'signup'
   onModeChange: (mode: 'signin' | 'signup') => void
-  onSubmit: (data: { phoneNumber: string; name?: string; mode: 'signin' | 'signup' }) => Promise<boolean>
+  onSubmit: (data: { phoneNumber: string; name?: string; password?: string; mode: 'signin' | 'signup' }) => Promise<boolean>
   isLoading?: boolean
 }
 
 const AuthToggle = ({ mode, onModeChange, onSubmit, isLoading = false }: AuthToggleProps) => {
   const [formData, setFormData] = useState({
     phoneNumber: '',
-    name: ''
+    name: '',
+    password: ''
   })
-  const [showOtp, setShowOtp] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const formatPhoneNumber = (value: string) => {
     // Remove all non-digits
@@ -62,6 +64,11 @@ const AuthToggle = ({ mode, onModeChange, onSubmit, isLoading = false }: AuthTog
       return
     }
 
+    if (!formData.password.trim()) {
+      toast.error('Please enter your password')
+      return
+    }
+
     // Basic Ethiopian phone number validation
     const cleanPhone = formData.phoneNumber.replace(/\D/g, '')
     if (cleanPhone.length < 9 || (!cleanPhone.startsWith('251') && !cleanPhone.startsWith('09') && !cleanPhone.startsWith('07'))) {
@@ -72,11 +79,12 @@ const AuthToggle = ({ mode, onModeChange, onSubmit, isLoading = false }: AuthTog
     const success = await onSubmit({
       phoneNumber: formData.phoneNumber,
       name: formData.name,
+      password: formData.password,
       mode
     })
 
     if (success) {
-      setFormData({ phoneNumber: '', name: '' })
+      setFormData({ phoneNumber: '', name: '', password: '' })
     }
   }
 
@@ -101,7 +109,7 @@ const AuthToggle = ({ mode, onModeChange, onSubmit, isLoading = false }: AuthTog
             <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
               <ChefHat className="w-8 h-8 text-brand-red" />
             </div>
-            <h1 className="text-2xl font-bold text-white">keol Burger</h1>
+            <h1 className="text-2xl font-bold text-white">keol</h1>
             <p className="text-brand-secondary">& Pizza House</p>
           </Link>
         </div>
@@ -113,7 +121,7 @@ const AuthToggle = ({ mode, onModeChange, onSubmit, isLoading = false }: AuthTog
               {mode === 'signin' ? 'Welcome Back' : 'Create Account'}
             </h2>
             <p className="text-gray-600 mt-2">
-              {mode === 'signin' ? 'Sign in to your account' : 'Join the keol Burger family'}
+              {mode === 'signin' ? 'Sign in to your account' : 'Join the keol family'}
             </p>
           </div>
 
@@ -141,7 +149,7 @@ const AuthToggle = ({ mode, onModeChange, onSubmit, isLoading = false }: AuthTog
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {mode === 'signup' && (
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
@@ -178,12 +186,38 @@ const AuthToggle = ({ mode, onModeChange, onSubmit, isLoading = false }: AuthTog
                   required
                 />
               </div>
-              <p className="text-xs text-gray-500 mt-2">
-                {mode === 'signin' 
-                  ? 'Enter your phone number to sign in instantly'
-                  : 'We\'ll create your account with this phone number'
-                }
-              </p>
+            </div>
+
+            <div>
+              <label htmlFor="password" class="block text-sm font-medium text-gray-700 mb-2">
+                Password
+              </label>
+              <div class="relative">
+                <Lock class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.password}
+                  onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                  placeholder="Enter your password"
+                  className="input-field pl-11"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+              {mode === 'signin' && (
+                <div className="text-right mt-2">
+                  <Link href="/forgot-password" class="text-sm text-brand-red hover:text-brand-red-dark">
+                    Forgot password?
+                  </Link>
+                </div>
+              )}
             </div>
 
             <button
@@ -221,7 +255,7 @@ const AuthToggle = ({ mode, onModeChange, onSubmit, isLoading = false }: AuthTog
           {/* Additional Info */}
           <div className="mt-6 text-center text-sm text-gray-600">
             <p>
-              {mode === 'signin' ? 'New to keol Burger?' : 'Already have an account?'}{' '}
+              {mode === 'signin' ? 'New to keol?' : 'Already have an account?'}{' '}
               <button
                 onClick={() => onModeChange(mode === 'signin' ? 'signup' : 'signin')}
                 className="text-brand-red hover:text-brand-red-dark font-medium"

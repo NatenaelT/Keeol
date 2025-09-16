@@ -42,6 +42,8 @@ export interface Database {
           last_login: string | null
           permissions: string[]
           password: string | null
+          password_reset_token: string | null
+          password_reset_expires: string | null
         }
         Insert: {
           id?: string

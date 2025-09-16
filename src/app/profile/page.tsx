@@ -87,6 +87,7 @@ const ProfilePage = () => {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    console.log('isAuthenticated', isAuthenticated);
     if (user && isAuthenticated) {
       fetchUserProfile()
       fetchLoyaltyData()

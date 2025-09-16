@@ -5,18 +5,20 @@ import { cookies } from 'next/headers'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { phoneNumber, password } = body
+    const { phoneNumber, contact, email, password } = body
+
+    const rawContact: string | undefined = (contact || email || phoneNumber)
 
     // Validate required fields
-    if (!phoneNumber || !password) {
+    if (!rawContact || !password) {
       return NextResponse.json(
-        { success: false, message: 'Phone number and password are required' },
+        { success: false, message: 'Email/Phone and password are required' },
         { status: 400 }
       )
     }
 
     // Validate data types
-    if (typeof phoneNumber !== 'string' || typeof password !== 'string') {
+    if (typeof rawContact !== 'string' || typeof password !== 'string') {
       return NextResponse.json(
         { success: false, message: 'Invalid data format' },
         { status: 400 }
@@ -24,21 +26,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Clean and validate phone number
-    const cleanPhone = phoneNumber.replace(/\D/g, '')
-    if (cleanPhone.length < 9) {
-      return NextResponse.json(
-        { success: false, message: 'Phone number is too short' },
-        { status: 400 }
-      )
-    }
-
-    if (!cleanPhone.startsWith('251') && !cleanPhone.startsWith('09') && !cleanPhone.startsWith('07')) {
-      return NextResponse.json(
-        { success: false, message: 'Please enter a valid Ethiopian phone number' },
-        { status: 400 }
-      )
-    }
-
     // Validate password length
     if (password.length < 6) {
       return NextResponse.json(
@@ -48,7 +35,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Attempt login
-    const result = await authService.loginWithPassword(phoneNumber, password)
+    const result = await authService.loginWithPasswordByContact(rawContact, password)
 
     if (!result) {
       return NextResponse.json(
@@ -76,6 +63,7 @@ export async function POST(request: NextRequest) {
         id: user.id,
         name: user.name,
         phoneNumber: user.phoneNumber,
+        email: user.email,
         role: user.role,
         loyaltyPoints: user.loyaltyPoints,
         loyaltyTier: user.loyaltyTier

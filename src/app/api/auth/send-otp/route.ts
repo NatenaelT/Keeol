@@ -3,34 +3,35 @@ import { authService } from '@/services/authService'
 
 export async function POST(request: NextRequest) {
   try {
-    const { phoneNumber } = await request.json()
+    const { phoneNumber, email, contact } = await request.json()
 
-    if (!phoneNumber) {
+    const rawContact = contact || email || phoneNumber
+
+    if (!rawContact) {
       return NextResponse.json(
-        { message: 'Phone number is required' },
+        { success: false, message: 'Email or phone number is required' },
         { status: 400 }
       )
     }
 
-    const success = await authService.sendOTP(phoneNumber)
-    
-    if (success) {
-      return NextResponse.json({
-        message: 'OTP sent successfully',
-        expiresIn: 600 // 10 minutes in seconds
-      })
-    } else {
-      return NextResponse.json(
-        { message: 'Failed to send OTP. Please try again.' },
-        { status: 500 }
-      )
-    }
+    const result = await authService.sendOTP(rawContact)
+
+    // Do not return the code in production
+    return NextResponse.json({
+      success: true,
+      message: 'Verification code sent',
+      channel: result.channel,
+      expiresAt: result.expiresAt,
+      code: result.code
+    })
 
   } catch (error: any) {
     console.error('Send OTP error:', error)
+    const message = error?.message === 'Invalid phone number' ? 'Please enter a valid phone number' : 'Internal server error'
+    const status = error?.message === 'Invalid phone number' ? 400 : 500
     return NextResponse.json(
-      { message: error.message || 'Internal server error' },
-      { status: 500 }
+      { success: false, message },
+      { status }
     )
   }
 }

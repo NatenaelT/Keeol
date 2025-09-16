@@ -38,12 +38,12 @@ const AuthPage = () => {
     window.history.replaceState({}, '', url.toString())
   }
 
-  const handleSubmit = async (data: { phoneNumber: string; name?: string; mode: 'signin' | 'signup' }) => {
+  const handleSubmit = async (data: { phoneNumber: string; name?: string; password?: string; mode: 'signin' | 'signup' }) => {
     setIsLoading(true)
-    
+
     try {
       const endpoint = data.mode === 'signin' ? '/api/auth/login' : '/api/auth/register'
-      
+
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
@@ -51,7 +51,8 @@ const AuthPage = () => {
         },
         body: JSON.stringify({
           phoneNumber: data.phoneNumber,
-          name: data.name
+          name: data.name,
+          password: data.password
         }),
       })
 

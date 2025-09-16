@@ -3,22 +3,29 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
-import { toast } from 'react-hot-toast'
 import AuthToggle from '@/components/auth/AuthToggle'
 
-export interface AuthFormData {
-  phoneNumber: string
+export type AuthMode = 'signin' | 'signup'
+
+export interface SendCodePayload {
+  contact: string
+  mode: AuthMode
   name?: string
-  password: string
-  mode: 'signin' | 'signup'
+}
+
+export interface VerifyCodePayload {
+  contact: string
+  code: string
+  mode: AuthMode
+  name?: string
 }
 
 const AuthPage = () => {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const { isAuthenticated, isLoading: authLoading } = useAuth()
+  const { isAuthenticated, isLoading: authLoading, sendOTP, verifyOTP } = useAuth()
   
-  const [mode, setMode] = useState<'signin' | 'signup'>('signin')
+  const [mode, setMode] = useState<AuthMode>('signin')
   const [isLoading, setIsLoading] = useState(false)
 
   // Get initial mode from URL params
@@ -37,64 +44,32 @@ const AuthPage = () => {
     }
   }, [isAuthenticated, authLoading, searchParams, router])
 
-  const handleModeChange = (newMode: 'signin' | 'signup') => {
+  const handleModeChange = (newMode: AuthMode) => {
     setMode(newMode)
-    // Update URL without navigation
     const url = new URL(window.location.href)
     url.searchParams.set('mode', newMode)
     window.history.replaceState({}, '', url.toString())
   }
 
-  const handleSubmit = async (data: AuthFormData): Promise<boolean> => {
+  const handleSendCode = async (payload: SendCodePayload): Promise<boolean> => {
     setIsLoading(true)
-
     try {
-      const endpoint = data.mode === 'signin' ? '/api/auth/login' : '/api/auth/register'
-      
-      const requestBody = JSON.stringify({
-        phoneNumber: data.phoneNumber,
-        ...(data.mode === 'signup' && { name: data.name }),
-        password: data.password
-      })
+      const ok = await sendOTP(payload.contact)
+      return ok
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: requestBody,
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`)
-      }
-
-      const result = await response.json()
-
-      if (result.success) {
-        toast.success(
-          data.mode === 'signin'
-            ? `Welcome back, ${result.user.name}!`
-            : `Account created successfully! Welcome, ${result.user.name}!`
-        )
-        
+  const handleVerifyCode = async (payload: VerifyCodePayload): Promise<boolean> => {
+    setIsLoading(true)
+    try {
+      const ok = await verifyOTP({ contact: payload.contact, code: payload.code, name: payload.name })
+      if (ok) {
         const redirectTo = searchParams.get('redirect') || '/profile'
-        
-        // Use router.push instead of window.location for better UX
-        setTimeout(() => {
-          router.push(redirectTo)
-        }, 100)
-        
-        return true
-      } else {
-        throw new Error(result.message || `${data.mode === 'signin' ? 'Sign in' : 'Sign up'} failed`)
+        setTimeout(() => router.push(redirectTo), 100)
       }
-    } catch (error) {
-      console.error('Auth error:', error)
-      const errorMessage = error instanceof Error ? error.message : 'Authentication failed. Please try again.'
-      toast.error(errorMessage)
-      return false
+      return ok
     } finally {
       setIsLoading(false)
     }
@@ -108,16 +83,14 @@ const AuthPage = () => {
     )
   }
 
-  // Don't render auth form if already authenticated
-  if (isAuthenticated) {
-    return null
-  }
+  if (isAuthenticated) return null
 
   return (
     <AuthToggle
       mode={mode}
       onModeChange={handleModeChange}
-      onSubmit={handleSubmit}
+      onSendCode={handleSendCode}
+      onVerifyCode={handleVerifyCode}
       isLoading={isLoading}
     />
   )

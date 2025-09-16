@@ -62,6 +62,8 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
 interface AuthContextType extends AuthState {
   login: (phoneNumber: string, password: string) => Promise<boolean>
   loginWithTelegram: (telegramData: any) => Promise<boolean>
+  sendOTP: (contact: string) => Promise<boolean>
+  verifyOTP: (params: { contact: string; code: string; name?: string }) => Promise<boolean>
   logout: () => void
   hasPermission: (permission: string) => boolean
   hasRole: (roles: UserRole | UserRole[]) => boolean
@@ -163,6 +165,72 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }, [])
 
+  const sendOTP = useCallback(async (contact: string): Promise<boolean> => {
+    try {
+      dispatch({ type: 'SET_LOADING', payload: true })
+      dispatch({ type: 'CLEAR_ERROR' })
+
+      const response = await fetch('/api/auth/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contact })
+      })
+
+      const result = await response.json()
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || 'Failed to send verification code')
+      }
+
+      if (result.code) {
+        console.log('Dev OTP code:', result.code)
+      }
+
+      return true
+    } catch (error: any) {
+      console.error('Send OTP failed:', error)
+      dispatch({ type: 'SET_ERROR', payload: error.message || 'Failed to send verification code' })
+      return false
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false })
+    }
+  }, [])
+
+  const verifyOTP = useCallback(async ({ contact, code, name }: { contact: string; code: string; name?: string }): Promise<boolean> => {
+    try {
+      dispatch({ type: 'SET_LOADING', payload: true })
+      dispatch({ type: 'CLEAR_ERROR' })
+
+      const response = await fetch('/api/auth/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contact, code, name })
+      })
+
+      const result = await response.json()
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || 'Verification failed')
+      }
+
+      const { user, token } = result
+      Cookies.set('auth_token', token, {
+        expires: 7,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax'
+      })
+
+      dispatch({ type: 'SET_TOKEN', payload: token })
+      dispatch({ type: 'SET_USER', payload: user })
+
+      return true
+    } catch (error: any) {
+      console.error('Verify OTP failed:', error)
+      dispatch({ type: 'SET_ERROR', payload: error.message || 'Verification failed' })
+      return false
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false })
+    }
+  }, [])
+
   const loginWithTelegram = useCallback(async (telegramData: any): Promise<boolean> => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true })
@@ -245,6 +313,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     ...state,
     login,
     loginWithTelegram,
+    sendOTP,
+    verifyOTP,
     logout,
     hasPermission,
     hasRole,

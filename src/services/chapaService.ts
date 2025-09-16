@@ -133,7 +133,7 @@ class ChapaPaymentService {
       callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/payments/callback`,
       return_url: `${process.env.NEXT_PUBLIC_APP_URL}/orders/${orderData.orderId}?payment=success`,
       customization: {
-        title: 'Keeol Burger & Pizza House',
+        title: 'keol',
         description: `Payment for Order #${orderData.orderId}`,
         logo: `${process.env.NEXT_PUBLIC_APP_URL}/logo.png`
       }

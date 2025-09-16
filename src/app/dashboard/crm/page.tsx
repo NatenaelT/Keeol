@@ -71,7 +71,7 @@ const CRMDashboard = () => {
         total_orders: 15,
         total_spent: 6750,
         last_order_date: new Date(Date.now() - 86400000).toISOString(),
-        favorite_items: ['Keeol Special Burger', 'Margherita Pizza'],
+        favorite_items: ['keol Special Burger', 'Margherita Pizza'],
         created_at: new Date(Date.now() - 86400000 * 30).toISOString(),
         status: 'vip'
       },

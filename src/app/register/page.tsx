@@ -174,7 +174,7 @@ const RegisterPage = () => {
             <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
               <ChefHat className="w-8 h-8 text-brand-red" />
             </div>
-            <h1 className="text-2xl font-bold text-white">Keeol Burger</h1>
+            <h1 className="text-2xl font-bold text-white">keol</h1>
             <p className="text-brand-yellow">& Pizza House</p>
           </Link>
         </div>
@@ -183,7 +183,7 @@ const RegisterPage = () => {
         <div className="bg-white rounded-2xl shadow-2xl p-8">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-gray-900">Create Account</h2>
-            <p className="text-gray-600 mt-2">Join the Keeol Burger family</p>
+            <p className="text-gray-600 mt-2">Join the keol family</p>
           </div>
 
           {/* Progress Steps */}

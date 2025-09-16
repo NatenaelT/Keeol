@@ -18,17 +18,17 @@ const poppins = Poppins({
 })
 
 export const metadata: Metadata = {
-  title: 'Keeol Burger & Pizza House',
+  title: 'keol',
   description: 'Delicious burgers and pizzas delivered fresh to your door',
   keywords: ['burger', 'pizza', 'restaurant', 'food delivery', 'Ethiopian food'],
-  authors: [{ name: 'Keeol Burger Team' }],
+  authors: [{ name: 'keol Team' }],
   robots: 'index, follow',
   openGraph: {
-    title: 'Keeol Burger & Pizza House',
+    title: 'keol',
     description: 'Delicious burgers and pizzas delivered fresh to your door',
     type: 'website',
     locale: 'en_US',
-    siteName: 'Keeol Burger',
+    siteName: 'keol',
   },
 }
 

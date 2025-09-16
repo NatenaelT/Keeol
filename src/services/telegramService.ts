@@ -108,7 +108,7 @@ ${itemsList}
 <b>Total: ${orderData.total} ETB</b>
 <b>Estimated Time: ${orderData.estimatedTime} minutes</b>
 
-Thank you for choosing Keeol Burger! 🍕
+Thank you for choosing keol! 🍕
     `.trim()
 
     return this.sendMessage(chatId, message, {
@@ -144,7 +144,7 @@ Thank you for choosing Keeol Burger! 🍕
     const statusEmojis = {
       confirmed: '✅',
       preparing: '👨‍🍳',
-      ready: '🎉',
+      ready: '��',
       out_for_delivery: '🚚',
       delivered: '✅',
       cancelled: '❌'
@@ -311,7 +311,7 @@ Your delicious food will be with you soon! 🍔🍕
    */
   private async sendWelcomeMessage(chatId: number, userName: string): Promise<void> {
     const message = `
-👋 Welcome to Keeol Burger, ${userName}!
+👋 Welcome to keol, ${userName}!
 
 🍔 We serve the best burgers and pizzas in Addis Ababa!
 

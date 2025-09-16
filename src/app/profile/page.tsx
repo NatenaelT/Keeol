@@ -160,7 +160,7 @@ const ProfilePage = () => {
           id: '1',
           type: 'earned',
           points: 45,
-          description: 'Order #2847 - Keeol Special Burger',
+          description: 'Order #2847 - keol Special Burger',
           date: new Date(Date.now() - 86400000).toISOString(),
           order_id: '2847'
         },
@@ -226,7 +226,7 @@ const ProfilePage = () => {
         {
           id: '4',
           name: 'Free Burger',
-          description: 'Get a free Keeol Special Burger',
+          description: 'Get a free keol Special Burger',
           points_required: 600,
           reward_type: 'free_item',
           reward_value: 0,

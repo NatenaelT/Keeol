@@ -33,7 +33,7 @@ const ContactPage = () => {
       name: 'Bole Branch (Main)',
       address: 'Bole Road, Near Edna Mall, Addis Ababa',
       phone: '+251-911-123456',
-      email: 'bole@keeolburger.com',
+      email: 'bole@keol.com',
       hours: {
         weekdays: '24/7',
         weekend: '24/7'
@@ -45,7 +45,7 @@ const ContactPage = () => {
       name: 'Kazanchis Branch',
       address: 'Kazanchis, Commercial Area, Addis Ababa',
       phone: '+251-911-654321',
-      email: 'kazanchis@keeolburger.com',
+      email: 'kazanchis@keol.com',
       hours: {
         weekdays: '6:00 AM - 11:00 PM',
         weekend: '7:00 AM - 12:00 AM'
@@ -57,7 +57,7 @@ const ContactPage = () => {
       name: 'Piassa Branch',
       address: 'Piassa, Central District, Addis Ababa',
       phone: '+251-911-789012',
-      email: 'piassa@keeolburger.com',
+      email: 'piassa@keol.com',
       hours: {
         weekdays: '6:00 AM - 10:00 PM',
         weekend: '7:00 AM - 11:00 PM'
@@ -79,8 +79,8 @@ const ContactPage = () => {
       icon: Mail,
       title: 'Email Us',
       description: 'We respond within 2 hours',
-      detail: 'support@keeolburger.com',
-      action: 'mailto:support@keeolburger.com'
+      detail: 'support@keol.com',
+      action: 'mailto:support@keol.com'
     },
     {
       icon: MessageCircle,

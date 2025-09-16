@@ -70,7 +70,7 @@ const CheckoutPage = () => {
     const mockCartItems: CartItem[] = [
       {
         id: '1',
-        name: 'Keeol Special Burger',
+        name: 'keol Special Burger',
         quantity: 2,
         price: 450,
         customizations: ['Extra cheese', 'No pickles']

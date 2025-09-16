@@ -99,7 +99,7 @@ const LiveChat = () => {
       if (messages.length === 0) {
         setTimeout(() => {
           addBotMessage(
-            `Hello ${user?.name || 'there'}! 👋 Welcome to Keeol Burger support. How can I help you today?`
+            `Hello ${user?.name || 'there'}! 👋 Welcome to keol support. How can I help you today?`
           )
         }, 1000)
       }

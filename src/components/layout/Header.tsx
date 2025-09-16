@@ -123,7 +123,7 @@ const Header = () => {
               <ChefHat className="w-6 h-6 text-white" />
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-xl font-bold text-gray-900">Keeol Burger</h1>
+              <h1 className="text-xl font-bold text-gray-900">keol</h1>
               <p className="text-xs text-gray-600">& Pizza House</p>
             </div>
           </Link>

@@ -79,7 +79,7 @@ const KitchenDashboard = () => {
         items: [
           {
             id: '1',
-            name: 'Keeol Special Burger',
+            name: 'keol Special Burger',
             quantity: 2,
             customizations: ['No pickles', 'Extra cheese'],
             prepTime: 12,

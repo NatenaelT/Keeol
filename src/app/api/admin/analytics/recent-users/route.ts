@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
       {
         id: '1a6af62e-e67c-49ef-9c61-11d5a042ac03',
         name: 'Natenael Teketel (Admin)',
-        email: 'admin@keolburger.com',
+        email: 'admin@keol.com',
         phone_number: '+251917911604',
         role: 'admin',
         loyalty_tier: 'Platinum',

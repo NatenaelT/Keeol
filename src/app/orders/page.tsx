@@ -68,12 +68,12 @@ const OrdersPage = () => {
         total: 1440,
         rating: 5,
         items: [
-          { id: '1', name: 'Keeol Special Burger', quantity: 2, price: 450 },
+          { id: '1', name: 'keol Special Burger', quantity: 2, price: 450 },
           { id: '2', name: 'Margherita Pizza', quantity: 1, price: 380 },
           { id: '3', name: 'Ethiopian Coffee', quantity: 2, price: 80 }
         ],
         restaurant: {
-          name: 'Keeol Burger - Bole Branch',
+          name: 'keol - Bole Branch',
           address: 'Bole Road, Near Edna Mall'
         }
       },
@@ -89,7 +89,7 @@ const OrdersPage = () => {
           { id: '6', name: 'Chocolate Milkshake', quantity: 1, price: 150 }
         ],
         restaurant: {
-          name: 'Keeol Burger - Bole Branch',
+          name: 'keol - Bole Branch',
           address: 'Bole Road, Near Edna Mall'
         }
       },
@@ -104,7 +104,7 @@ const OrdersPage = () => {
           { id: '8', name: 'Ethiopian Coffee', quantity: 2, price: 80 }
         ],
         restaurant: {
-          name: 'Keeol Burger - Kazanchis Branch',
+          name: 'keol - Kazanchis Branch',
           address: 'Kazanchis, Commercial Area'
         }
       }

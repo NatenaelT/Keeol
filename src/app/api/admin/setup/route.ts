@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
         phoneNumber: adminPhone,
         name: 'Natenael Teketel (Admin)',
         role: 'admin',
-        email: 'admin@keolburger.com'
+        email: 'admin@keol.com'
       })
       
       console.log('Admin user created:', adminUser.id)

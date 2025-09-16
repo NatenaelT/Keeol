@@ -77,7 +77,7 @@ const TrackOrderPage = () => {
       address: 'Bole, Addis Ababa, Near Friendship City Center'
     },
     restaurant: {
-      name: 'Keeol Burger - Bole Branch',
+      name: 'keol - Bole Branch',
       address: 'Bole Road, Near Edna Mall',
       phone: '+251-911-123456'
     },
@@ -88,7 +88,7 @@ const TrackOrderPage = () => {
       rating: 4.8
     },
     items: [
-      { name: 'Keeol Special Burger', quantity: 2, price: 450 },
+      { name: 'keol Special Burger', quantity: 2, price: 450 },
       { name: 'Margherita Pizza', quantity: 1, price: 380 },
       { name: 'Ethiopian Coffee', quantity: 2, price: 80 }
     ],

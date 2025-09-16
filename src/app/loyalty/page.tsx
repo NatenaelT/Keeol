@@ -155,7 +155,7 @@ const LoyaltyPage = () => {
       {
         id: '6',
         name: 'Free Burger',
-        description: 'Get a free Keeol Special Burger',
+        description: 'Get a free keol Special Burger',
         points_required: 600,
         reward_type: 'free_item',
         reward_value: 0,

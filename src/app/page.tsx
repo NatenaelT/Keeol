@@ -42,7 +42,7 @@ export default function HomePage() {
   const popularItems = [
     {
       id: 1,
-      name: "Keeol Special Burger",
+      name: "keol Special Burger",
       price: "450 ETB",
       image: "/images/burger-special.jpg",
       rating: 4.8,
@@ -80,7 +80,7 @@ export default function HomePage() {
             transition={{ duration: 0.8 }}
           >
             <h1 className="text-5xl md:text-7xl font-bold font-display mb-6 text-shadow">
-              Keeol Burger & Pizza House
+              keol
             </h1>
             <p className="text-xl md:text-2xl mb-8 max-w-2xl mx-auto opacity-90">
               Delicious burgers and pizzas made with love, delivered fresh to your door
@@ -106,7 +106,7 @@ export default function HomePage() {
             transition={{ duration: 0.8 }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Why Choose Keeol?</h2>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Why Choose keol?</h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               We're committed to providing the best food experience in Ethiopia
             </p>

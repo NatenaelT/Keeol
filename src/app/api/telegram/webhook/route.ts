@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
       }
 
       await sendTelegramMessage(chatId,
-        `🍔 Welcome to Keeol Burger & Pizza House, ${message.from.first_name}!\n\n` +
+        `🍔 Welcome to keol, ${message.from.first_name}!\n\n` +
         'I can help you:\n' +
         '• 📋 /register - Create your account\n' +
         '• 🍕 /menu - Browse our delicious menu\n' +
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
           `👤 Name: ${user.name}\n` +
           `🆔 Account ID: ${user.id}\n` +
           `📱 Telegram: @${message.from.username || 'N/A'}\n\n` +
-          `🎉 Welcome to Keeol Burger family!\n\n` +
+          `🎉 Welcome to keol family!\n\n` +
           `You can now:\n` +
           `• Browse our menu: /menu\n` +
           `• Place orders on our website\n` +
@@ -162,7 +162,7 @@ export async function POST(request: NextRequest) {
       }
     } else if (text.startsWith('/contact')) {
       await sendTelegramMessage(chatId,
-        '📞 Contact Keeol Burger & Pizza House:\n\n' +
+        '📞 Contact keol:\n\n' +
         '📱 Phone: +251-911-123456\n' +
         '📍 Address: Bole, Addis Ababa\n' +
         '🌐 Website: ' + process.env.NEXT_PUBLIC_APP_URL + '\n' +
@@ -174,7 +174,7 @@ export async function POST(request: NextRequest) {
       // Default response for unknown messages
       await sendTelegramMessage(chatId,
         'Hi there! 👋\n\n' +
-        'I\'m the Keeol Burger bot. Send /help to see what I can do for you!'
+        'I\'m the keol bot. Send /help to see what I can do for you!'
       )
     }
 

@@ -9,23 +9,23 @@ module.exports = {
     extend: {
       colors: {
         brand: {
-          red: '#DC2626',
-          'red-dark': '#B91C1C',
-          'red-light': '#FCA5A5',
-          yellow: '#FBBF24',
-          'yellow-dark': '#F59E0B',
-          'yellow-light': '#FDE68A',
-          brown: '#92400E',
-          'brown-dark': '#78350F',
-          'brown-light': '#D2B48C',
+          red: '#EF7722',
+          'red-dark': '#D96D1E',
+          'red-light': '#F28A3E',
+          yellow: '#F0F0F0',
+          'yellow-dark': '#D6D6D6',
+          'yellow-light': '#F5F5F5',
+          brown: '#000000',
+          'brown-dark': '#000000',
+          'brown-light': '#333333',
         },
         primary: {
           50: '#FEF2F2',
           100: '#FEE2E2',
-          500: '#DC2626',
-          600: '#DC2626',
-          700: '#B91C1C',
-          900: '#7F1D1D',
+          500: '#EF7722',
+          600: '#EF7722',
+          700: '#D96D1E',
+          900: '#BF621A',
         }
       },
       fontFamily: {

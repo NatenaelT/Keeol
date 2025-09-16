@@ -56,7 +56,8 @@ const AuthPage = () => {
         }),
       })
 
-      const result = await response.json()
+      const resultText = await response.text();
+      const result = JSON.parse(resultText);
 
       if (response.ok && result.success) {
         toast.success(

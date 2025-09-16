@@ -4,11 +4,11 @@ import { cookies } from 'next/headers'
 
 export async function POST(request: NextRequest) {
   try {
-    const { phoneNumber } = await request.json()
+    const { phoneNumber, password } = await request.json()
 
-    if (!phoneNumber) {
+    if (!phoneNumber || !password) {
       return NextResponse.json(
-        { success: false, message: 'Phone number is required' },
+        { success: false, message: 'Phone number and password are required' },
         { status: 400 }
       )
     }
@@ -22,22 +22,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Find or create user by phone number (bypass OTP)
-    let user = await authService.findUserByPhone(phoneNumber)
-    if (!user) {
-      // Create new user with phone number
-      user = await authService.createUser({
-        phoneNumber,
-        name: `Customer ${phoneNumber.slice(-4)}`,
-        role: 'customer'
-      })
+    const result = await authService.loginWithPassword(phoneNumber, password)
+
+    if (!result) {
+        throw new Error('Login failed')
     }
 
-    // Update last login
-    await authService.updateLastLogin(user.id)
-
-    // Generate session token
-    const token = authService.generateSessionToken(user)
+    const { user, token } = result
 
     // Set secure cookie
     const cookieStore = cookies()

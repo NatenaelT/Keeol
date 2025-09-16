@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase'
 import { toast } from 'react-hot-toast'
+import bcrypt from 'bcrypt'
 
 export interface User {
   id: string
@@ -17,95 +18,35 @@ export interface User {
   loyaltyTier: string
 }
 
-// Store OTP temporarily (in production, use Redis or proper storage)
-const otpStore = new Map<string, { otp: string; expires: number; attempts: number }>()
-
 class AuthService {
   /**
-   * Send OTP to phone number
+   * Login with phone and password
    */
-  async sendOTP(phoneNumber: string): Promise<boolean> {
+  async loginWithPassword(phoneNumber: string, password: string): Promise<{ user: User; token: string } | null> {
     try {
-      // Clean and validate phone number
-      const cleanPhone = this.cleanPhoneNumber(phoneNumber)
-      if (!this.isValidEthiopianPhone(cleanPhone)) {
-        throw new Error('Invalid Ethiopian phone number')
-      }
-
-      // Check rate limiting
-      const existing = otpStore.get(phoneNumber)
-      if (existing && existing.attempts >= 3 && Date.now() < existing.expires) {
-        throw new Error('Too many attempts. Please try again later.')
-      }
-
-      // Generate 6-digit OTP
-      const otp = Math.floor(100000 + Math.random() * 900000).toString()
-      const expires = Date.now() + 10 * 60 * 1000 // 10 minutes
-
-      // Store OTP
-      otpStore.set(phoneNumber, {
-        otp,
-        expires,
-        attempts: (existing?.attempts || 0) + 1
-      })
-
-      // In development, log OTP to console
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`OTP for ${phoneNumber}: ${otp}`)
-      }
-
-      // TODO: Integrate with SMS service for production
-      // await this.sendSMS(phoneNumber, otp)
-
-      return true
-    } catch (error) {
-      console.error('Send OTP error:', error)
-      return false
-    }
-  }
-
-  /**
-   * Verify OTP and login
-   */
-  async verifyOTP(phoneNumber: string, otp: string): Promise<{ user: User; token: string } | null> {
-    try {
-      // Check OTP
-      const storedOtp = otpStore.get(phoneNumber)
-      if (!storedOtp) {
-        throw new Error('OTP not found. Please request a new one.')
-      }
-
-      if (Date.now() > storedOtp.expires) {
-        otpStore.delete(phoneNumber)
-        throw new Error('OTP has expired. Please request a new one.')
-      }
-
-      if (storedOtp.otp !== otp) {
-        throw new Error('Invalid OTP. Please try again.')
-      }
-
-      // OTP is valid, remove it
-      otpStore.delete(phoneNumber)
-
-      // Find or create user in database
-      let user = await this.findUserByPhone(phoneNumber)
+      const user = await this.findUserByPhone(phoneNumber)
       if (!user) {
-        user = await this.createUser({
-          phoneNumber,
-          name: `Customer ${phoneNumber.slice(-4)}`,
-          role: 'customer'
-        })
+        throw new Error('User not found')
+      }
+
+      if (!user.password) {
+        throw new Error('Password not set for this user')
+      }
+
+      const passwordMatch = await bcrypt.compare(password, user.password)
+      if (!passwordMatch) {
+        throw new Error('Invalid password')
       }
 
       // Update last login
       await this.updateLastLogin(user.id)
 
-      // Generate session token (in production, use proper JWT)
+      // Generate session token
       const token = this.generateSessionToken(user)
 
       return { user, token }
     } catch (error) {
-      console.error('Verify OTP error:', error)
+      console.error('Login with password error:', error)
       throw error
     }
   }
@@ -154,7 +95,7 @@ class AuthService {
   /**
    * Find user by phone number
    */
-  async findUserByPhone(phoneNumber: string): Promise<User | null> {
+  async findUserByPhone(phoneNumber: string): Promise<(User & { password?: string }) | null> {
     try {
       const { data, error } = await supabase
         .from('users')
@@ -201,10 +142,16 @@ class AuthService {
     telegramId?: number
     name: string
     email?: string
+    password?: string
     role?: 'customer' | 'waiter' | 'chef' | 'delivery' | 'operation_manager' | 'admin' | 'owner'
   }): Promise<User> {
     try {
       const permissions = this.getRolePermissions(userData.role || 'customer')
+      
+      let hashedPassword = null
+      if (userData.password) {
+        hashedPassword = await bcrypt.hash(userData.password, 10)
+      }
 
       const { data, error } = await supabase
         .from('users')
@@ -215,6 +162,7 @@ class AuthService {
           email: userData.email,
           role: userData.role || 'customer',
           permissions,
+          password: hashedPassword,
           loyalty_points: 0,
           loyalty_tier: 'Bronze',
           is_active: true
@@ -329,7 +277,7 @@ class AuthService {
   /**
    * Map database user to application user
    */
-  private mapDatabaseUserToUser(dbUser: any): User {
+  private mapDatabaseUserToUser(dbUser: any): User & { password?: string } {
     return {
       id: dbUser.id,
       phoneNumber: dbUser.phone_number,
@@ -343,7 +291,8 @@ class AuthService {
       lastLogin: dbUser.last_login,
       permissions: dbUser.permissions || [],
       loyaltyPoints: dbUser.loyalty_points || 0,
-      loyaltyTier: dbUser.loyalty_tier || 'Bronze'
+      loyaltyTier: dbUser.loyalty_tier || 'Bronze',
+      password: dbUser.password
     }
   }
 
